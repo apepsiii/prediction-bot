@@ -1,0 +1,9 @@
+{
+  "schedule": "0 */5 * * * *",
+  "symbol": "BTCUSDT",
+  "price_url": "https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT",
+  "ai_base_url": "http://127.0.0.1:20128/v1",
+  "ai_model": "cbai/glm-5.2",
+  "default_position_usd": 100.0,
+  "max_leverage": 5
+}
