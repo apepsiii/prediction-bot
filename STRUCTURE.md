@@ -1,84 +1,66 @@
-# Project Structure & Architecture: CRE 5-Minute Binance Prediction Bot
+# Sistem & Arsitektur: Continuous 5-Minute Prediction Arena
 
-## 1. Peta Direktori & File
-
-```text
-cre-prediction-bot/
-├── .env                                  # Kredensial privat lokal (AI_API_KEY_VAR, dsb.)
-├── .gitignore                            # Mengabaikan file sensitif, wasm, dan binary
-├── project.yaml                          # Konfigurasi level proyek CRE (RPC & targets)
-├── secrets.yaml                          # Pemetaan ID secret CRE ke environment variable
-├── go.mod                                # Definisi modul Go dan dependensi SDK CRE
-├── go.sum                                # Checksum dependensi Go
-├── PRD.md                                # Product Requirements Document
-├── AGENTS.md                             # Panduan agen AI & pemeliharaan teknis
-├── STRUCTURE.md                          # Dokumentasi arsitektur dan struktur file
-├── README.md                             # Ikhtisar umum & panduan mulai cepat
-└── prediction-workflow/                  # Direktori workflow utama
-    ├── main.go                           # Entry point WASM runner (wasip1 build tag)
-    ├── workflow.go                       # Logika inti: Cron trigger, HTTP fetch, AI inference, fallback
-    ├── workflow_test.go                  # Unit test Go untuk logika prediksi dan trigger
-    ├── workflow.yaml                     # Konfigurasi target CRE (staging & production)
-    ├── config.staging.json               # Parameter target staging (simulasi)
-    └── config.production.json            # Parameter target produksi
-```
-
----
-
-## 2. Diagram Alur Data (Data Flow)
+## 1. Diagram Alur Siklus Rantai 5 Menit (Chained 5M Cycle)
 
 ```mermaid
-flowchart TD
-    A["Cron Trigger (Setiap 5 Menit)"] --> B["onCronTrigger() Handler"]
-    B --> C["CRE HTTP Client\n(Binance API: ticker/24hr)"]
-    C --> D{"Data Pasar Diterima?"}
-    D -- Ya --> E["Ambil Secret AI_API_KEY\n(CRE Secrets Provider)"]
-    D -- Gagal --> F["Return Error & Log"]
-    E --> G["CRE HTTP Client\n(9router /chat/completions)"]
-    G --> H{"9router Merespons?"}
-    H -- Sukses --> I["Parse Prediksi AI\n(LONG/SHORT, TP, SL, Sizing)"]
-    H -- Gagal / Offline --> J["Kalkulasi Deterministic Technical Model\n(Momentum & 24h Range)"]
-    I --> K["Hitung Rasio Risk/Reward & Format Payload"]
-    J --> K
-    K --> L["Return ExecutionResult ke CRE Runner"]
+sequenceDiagram
+    autonumber
+    actor User as User (Human)
+    participant Web as Web Dashboard (Browser)
+    participant Engine as Continuous Engine (Go)
+    participant DB as SQLite WAL (data/prediction.db)
+    participant Binance as Binance API (Spot & Klines)
+    participant AI as 9router LLM (GLM-5.2)
+
+    Note over Engine,DB: Inisialisasi Ronde 5-Menit
+    Engine->>Binance: Ambil harga cutoff ronde 5m sebelumnya ($85,740.00)
+    Engine->>DB: Simpan Ronde Aktif (Patokan = $85,740.00, Cutoff = T+300s)
+    Engine->>Binance: Fetch Indikator (5m RSI, EMA9/21, 1m Micro-trend, 24h Ticker)
+    Engine->>AI: Kirim Prompt Quant Multi-Timeframe (Presisi 99.5%)
+    AI-->>Engine: Output JSON (Pilihan: DOWN, Conf: 95%, Reasoning)
+    Engine->>DB: Perbarui AI Choice & Reasoning di Ronde Aktif
+
+    Note over User,Web: User Bertanding Selama Rentang 5 Menit
+    Web->>Engine: GET /api/rounds/active (Tampilkan countdown & pergerakan harga)
+    User->>Web: Klik [TEBAK DOWN]
+    Web->>Engine: POST /api/rounds/bet (Terkunci ke Ronde Aktif)
+    Engine->>DB: Update user_choice = 'DOWN'
+
+    Note over Engine,Binance: Detik Cutoff 5 Menit Tiba!
+    Engine->>Binance: Fetch harga spot final pada waktu cutoff ($85,580.00)
+    Engine->>Engine: Bandingkan $85,580.00 vs Patokan $85,740.00 -> Hasil: DOWN
+    Engine->>DB: Update Ronde: status='CONSOLIDATED', final_price=$85,580.00, Pemenang: Keduanya Benar
+    
+    Note over Engine,DB: Sambung Otomatis ke Ronde Berikutnya!
+    Engine->>DB: Buka Ronde Baru (Patokan Acuan = $85,580.00, Cutoff = T+300s)
+    Engine->>AI: Trigger Analisis Multi-Timeframe Baru
 ```
 
----
+## 2. Struktur Direktori Proyek
 
-## 3. Komponen Arsitektur Utama
-
-### 3.1. `prediction-workflow/main.go`
-Berfungsi sebagai gerbang eksekusi *WebAssembly* (`wasip1`).
-```go
-//go:build wasip1
-package main
-
-import (
-	"github.com/smartcontractkit/cre-sdk-go/cre"
-	"github.com/smartcontractkit/cre-sdk-go/cre/wasm"
-)
-
-func main() {
-	wasm.NewRunner(cre.ParseJSON[Config]).Run(InitWorkflow)
-}
 ```
-
-### 3.2. `prediction-workflow/workflow.go`
-Modul utama yang mencakup:
-- **`InitWorkflow`**: Menginisialisasi `cron.Trigger(&cron.Config{Schedule: schedule})`.
-- **`onCronTrigger`**: Mengeksekusi siklus 5-menit, memanggil Binance API via `creHttp.SendRequest`, mengekstrak kunci API, mengevaluasi AI via 9router, dan membungkus hasil dalam `ExecutionResult`.
-- **`queryAIOrFallback`**: Melakukan inferensi prompt AI dan melakukan *fallback* aman jika endpoint AI tidak merespons.
-- **`computeTechnicalPrediction`**: Menghitung arah posisi, target harga, batas risiko, dan ukuran posisi berdasarkan momentum pergerakan harga 24 jam.
-
-### 3.3. `prediction-workflow/workflow.yaml`
-Menghubungkan target eksekusi CLI (`staging-settings`, `production-settings`) ke file konfigurasi JSON dan `secrets.yaml`:
-```yaml
-staging-settings:
-  user-workflow:
-    workflow-name: "prediction-workflow-staging"
-    deployment-registry: "private"
-  workflow-artifacts:
-    workflow-path: "."
-    config-path: "./config.staging.json"
-    secrets-path: "../secrets.yaml"
+cre-prediction-bot/
+├── .env                              # Variabel rahasia lokal (AI_API_KEY_VAR, AI_BASE_URL, AI_MODEL)
+├── secrets.yaml                      # Pemetaan secrets Chainlink CRE
+├── project.yaml                      # Konfigurasi project CRE
+├── PRD.md                            # Product Requirements Document
+├── AGENTS.md                         # Panduan agen AI masa depan
+├── STRUCTURE.md                      # Diagram alur & arsitektur sistem
+├── README.md                         # Petunjuk operasional & CLI
+│
+├── data/
+│   └── prediction.db                 # Database SQLite aktif (WAL Mode)
+│
+├── prediction-workflow/              # Chainlink CRE Go Native Workflow
+│   ├── config.production.json        # Config runtime CRE
+│   ├── config.staging.json           # Config staging CRE
+│   ├── workflow.go                   # Core workflow logic (Cron 5m + WASM HTTP)
+│   ├── workflow_test.go              # Unit test alur kerja CRE
+│   └── workflow.yaml                 # Metadata alur kerja CRE
+│
+└── web/                              # Fullstack Prediction Arena Engine
+    ├── server.go                     # Continuous rolling engine, workers, REST APIs
+    ├── db.go                         # SQLite schema, queries, leaderboard logic
+    └── static/
+        └── index.html                # UI Dashboard (Tailwind CSS, Chart.js, Lucide)
 ```

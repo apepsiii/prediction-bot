@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Human vs AI Prediction Arena | Chainlink CRE & Binance</title>
+  <title>Human vs AI 5-Minute Prediction Arena | Real-Time Continuous • SQLite</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -45,64 +45,65 @@
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     .font-mono { font-family: 'JetBrains Mono', monospace; }
-    .glow-emerald { box-shadow: 0 0 25px rgba(16, 185, 129, 0.35); }
-    .glow-crimson { box-shadow: 0 0 25px rgba(239, 68, 68, 0.35); }
-    .glow-cre { box-shadow: 0 0 25px rgba(55, 91, 210, 0.35); }
-    .pulse-animation { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    @keyframes pulse-fast {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .animate-pulse-fast { animation: pulse-fast 1s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
   </style>
 </head>
 <body class="bg-dark-900 text-slate-100 min-h-screen flex flex-col selection:bg-cre selection:text-white">
 
-  <!-- Header & Live Ticker Bar -->
+  <!-- Header & Live Ticker Bar (WIB Timezone) -->
   <header class="border-b border-dark-700 bg-dark-800/80 backdrop-blur sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-4">
       
-      <!-- Logo & Subtitle -->
+      <!-- Brand & Timezone Info -->
       <div class="flex items-center space-x-3">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cre to-blue-400 flex items-center justify-center shadow-lg shadow-cre/30">
-          <i data-lucide="swords" class="w-5 h-5 text-white"></i>
+          <i data-lucide="zap" class="w-5 h-5 text-white"></i>
         </div>
         <div>
           <div class="flex items-center space-x-2">
-            <h1 class="text-lg font-bold text-white tracking-tight">PREDICTION ARENA</h1>
-            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-cre/20 text-blue-400 border border-cre/30">CRE x 9router</span>
+            <h1 class="text-lg font-bold text-white tracking-tight">AI PREDICTION ARENA</h1>
+            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-cre/20 text-blue-400 border border-cre/30">5M CONTINUOUS</span>
+            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">WIB (UTC+7)</span>
           </div>
-          <p class="text-xs text-slate-400">Human vs AI Quant Duel • Binance Live Feed</p>
+          <p class="text-xs text-slate-400">Patokan Acuan: Cutoff 5m Lalu • Konsolidasi Otomatis Setiap 5 Menit</p>
         </div>
       </div>
 
-      <!-- Live Asset Selector & Real-Time Price -->
+      <!-- Live Asset & Current Price Display -->
       <div class="flex items-center space-x-4 bg-dark-900/90 px-4 py-2 rounded-xl border border-dark-700">
-        <div class="flex space-x-1 bg-dark-800 p-1 rounded-lg border border-dark-700">
-          <button onclick="changeSymbol('BTCUSDT')" id="btn-btc" class="px-2.5 py-1 text-xs font-semibold rounded transition-all bg-cre text-white shadow">BTC</button>
-          <button onclick="changeSymbol('ETHUSDT')" id="btn-eth" class="px-2.5 py-1 text-xs font-semibold rounded transition-all text-slate-400 hover:text-white">ETH</button>
-          <button onclick="changeSymbol('SOLUSDT')" id="btn-sol" class="px-2.5 py-1 text-xs font-semibold rounded transition-all text-slate-400 hover:text-white">SOL</button>
+        <div class="flex items-center space-x-2 font-mono text-sm font-bold text-white">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+          <span>BTC/USDT</span>
         </div>
 
         <div class="h-6 w-[1px] bg-dark-700"></div>
 
         <div>
           <div class="text-[10px] text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block"></span>
-            <span id="label-symbol">BTC/USDT</span> Live
+            <span>Harga Live Binance</span> • <span id="clock-wib" class="font-mono text-slate-300">--:--:-- WIB</span>
           </div>
           <div class="flex items-baseline space-x-2">
-            <span id="live-price" class="font-mono text-xl font-bold text-white tracking-tight">$85,820.00</span>
-            <span id="live-change" class="font-mono text-xs font-semibold text-emerald-400">+0.65%</span>
+            <span id="live-price" class="font-mono text-xl font-bold text-white tracking-tight">$85,760.00</span>
+            <span id="live-change" class="font-mono text-xs font-semibold text-emerald-400">+0.50%</span>
           </div>
         </div>
       </div>
 
-      <!-- Scoreboard Mini Summary -->
+      <!-- Leaderboard Header Quick Score -->
       <div class="flex items-center space-x-6">
         <div class="text-right">
-          <div class="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Skor Duel</div>
-          <div class="font-mono text-base font-bold text-white flex items-center space-x-2">
-            <span class="text-emerald-400">Anda: <span id="score-user">0</span></span>
+          <div class="text-[10px] uppercase text-slate-400 font-semibold tracking-wider">Akurasi Prediksi</div>
+          <div class="font-mono text-sm font-bold text-white flex items-center space-x-2">
+            <span class="text-emerald-400">Anda: <span id="score-user-pct">0%</span></span>
             <span class="text-slate-600">vs</span>
-            <span class="text-blue-400">AI: <span id="score-ai">0</span></span>
+            <span class="text-blue-400">AI: <span id="score-ai-pct">0%</span></span>
           </div>
         </div>
+
         <button onclick="openCREModal()" class="flex items-center space-x-1.5 bg-dark-700 hover:bg-dark-600 border border-dark-600 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 transition">
           <i data-lucide="cpu" class="w-3.5 h-3.5 text-blue-400"></i>
           <span>Simulasi CRE</span>
@@ -115,255 +116,172 @@
   <!-- Main Content Area -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex-1 space-y-6 w-full">
 
-    <!-- Active Battle or Setup Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <!-- Active 5-Minute Round Battle Arena Banner (Hero) -->
+    <div class="bg-gradient-to-b from-dark-800 to-dark-850 border border-dark-700 rounded-3xl p-6 shadow-2xl relative overflow-hidden">
+      <div class="absolute -top-24 -right-24 w-96 h-96 bg-cre/10 rounded-full blur-3xl pointer-events-none"></div>
 
-      <!-- LEFT COLUMN: Battle Control & Arena (7 Cols) -->
-      <div class="lg:col-span-7 space-y-6">
-
-        <!-- Active Round Banner (Shows during live countdown) -->
-        <div id="panel-active-round" class="hidden bg-gradient-to-b from-dark-800 to-dark-900 border border-dark-600 rounded-2xl p-6 relative overflow-hidden shadow-2xl">
-          <div class="absolute -right-12 -top-12 w-48 h-48 bg-cre/10 rounded-full blur-3xl pointer-events-none"></div>
-
-          <div class="flex items-center justify-between border-b border-dark-700/80 pb-4 mb-4">
-            <div class="flex items-center space-x-2.5">
-              <span class="w-3 h-3 rounded-full bg-rose-500 animate-pulse"></span>
-              <span class="text-xs uppercase font-extrabold tracking-widest text-rose-400">DUEL SEDANG BERLANGSUNG</span>
+      <!-- Top Row: Round ID, Cutoff Countdown & Progress -->
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-dark-700/80 pb-4">
+        <div class="flex items-center space-x-3">
+          <span class="relative flex h-3 w-3">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+          </span>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 id="hero-round-id" class="text-base font-extrabold text-white tracking-wide font-mono">RONDE AKTIF 5M</h2>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-400 border border-amber-400/30 font-mono">BERJALAN OTOMATIS</span>
             </div>
-            <div class="font-mono text-xs px-2.5 py-1 rounded-full bg-dark-700 border border-dark-600 text-slate-300" id="active-round-id">
-              RND-001
-            </div>
-          </div>
-
-          <!-- Countdown Big Clock -->
-          <div class="text-center py-2">
-            <div class="text-xs text-slate-400 uppercase tracking-widest font-semibold mb-1">Sisa Waktu Ronde</div>
-            <div id="countdown-timer" class="font-mono text-5xl sm:text-6xl font-black text-white tracking-widest text-shadow">
-              01:00
-            </div>
-          </div>
-
-          <!-- Real-Time Gauge vs Threshold -->
-          <div class="mt-6 bg-dark-900/90 border border-dark-700 p-4 rounded-xl space-y-3">
-            <div class="flex justify-between items-center text-xs">
-              <span class="text-slate-400">Batas Harga Acuan Anda:</span>
-              <span id="active-threshold-display" class="font-mono font-bold text-white text-sm">$85,800.00</span>
-            </div>
-            <div class="flex justify-between items-center text-xs">
-              <span class="text-slate-400">Harga Terkini:</span>
-              <span id="active-current-display" class="font-mono font-bold text-emerald-400 text-sm">$85,820.00</span>
-            </div>
-
-            <!-- Position Status Bar -->
-            <div class="pt-2">
-              <div class="h-3 w-full bg-dark-700 rounded-full overflow-hidden flex relative">
-                <div id="gauge-bar" class="h-full bg-emerald-500 transition-all duration-300 w-1/2"></div>
-              </div>
-              <div class="flex justify-between text-[10px] text-slate-500 mt-1 font-mono">
-                <span>ZONA DOWN (Bawah Target)</span>
-                <span id="active-status-text" class="text-emerald-400 font-bold">▲ DI ATAS TARGET (+0.02%)</span>
-                <span>ZONA UP (Atas Target)</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Duel Participants Choice Snapshot -->
-          <div class="grid grid-cols-2 gap-4 mt-6">
-            <div id="card-user-active" class="bg-dark-900 border border-dark-700 p-3.5 rounded-xl text-center">
-              <div class="text-xs text-slate-400">Tebakan Anda</div>
-              <div id="active-user-choice" class="font-mono text-lg font-black text-emerald-400 mt-1">▲ UP</div>
-              <div id="active-user-status" class="text-[11px] text-emerald-400 font-semibold mt-0.5">Memimpin</div>
-            </div>
-
-            <div id="card-ai-active" class="bg-dark-900 border border-dark-700 p-3.5 rounded-xl text-center">
-              <div class="text-xs text-slate-400">Tebakan AI (9router)</div>
-              <div id="active-ai-choice" class="font-mono text-lg font-black text-rose-400 mt-1">▼ DOWN</div>
-              <div id="active-ai-status" class="text-[11px] text-slate-500 font-semibold mt-0.5">Tertinggal</div>
-            </div>
-          </div>
-
-          <div class="mt-4 text-center">
-            <button onclick="abortRound()" class="text-xs text-slate-500 hover:text-rose-400 transition underline">Batalkan Ronde</button>
+            <p class="text-xs text-slate-400">
+              Mulai: <span id="hero-start-wib" class="text-slate-200 font-mono">--:--:-- WIB</span> • 
+              Cutoff Konsolidasi: <span id="hero-cutoff-wib" class="text-amber-400 font-mono font-bold">--:--:-- WIB</span>
+            </p>
           </div>
         </div>
 
-        <!-- Setup Form Panel (Shows when idle) -->
-        <div id="panel-setup-round" class="bg-dark-800 border border-dark-700 rounded-2xl p-6 shadow-xl space-y-6">
-          <div class="flex items-center justify-between border-b border-dark-700 pb-3">
+        <!-- Countdown Timer Pill -->
+        <div class="flex items-center space-x-3 bg-dark-900/90 border border-dark-600 px-4 py-2 rounded-2xl shadow-inner">
+          <div class="text-right">
+            <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Sisa Waktu Ronde</div>
+            <div id="countdown-text" class="font-mono text-2xl font-black text-amber-400">00:00</div>
+          </div>
+          <i data-lucide="timer" class="w-6 h-6 text-amber-400 animate-pulse"></i>
+        </div>
+      </div>
+
+      <!-- Timer Progress Bar -->
+      <div class="w-full bg-dark-900 h-1.5 rounded-full mt-3 overflow-hidden border border-dark-700/50">
+        <div id="countdown-progress-bar" class="bg-gradient-to-r from-cre via-blue-400 to-emerald-400 h-full rounded-full transition-all duration-1000" style="width: 100%"></div>
+      </div>
+
+      <!-- Price Benchmark vs Live Price Comparison Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+        
+        <!-- 1. Patokan Acuan (Cutoff 5m Sebelumnya) -->
+        <div class="bg-dark-900/90 border border-dark-700 rounded-2xl p-4.5 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-xs text-slate-400 pb-1">
+            <span class="font-bold uppercase tracking-wider text-[11px] text-yellow-400 flex items-center gap-1.5">
+              <i data-lucide="crosshair" class="w-3.5 h-3.5"></i>
+              Batas Patokan Acuan
+            </span>
+            <span class="text-[10px] bg-dark-800 px-2 py-0.5 rounded text-slate-400">Cutoff 5m Lalu</span>
+          </div>
+          <div class="mt-2">
+            <div id="benchmark-price" class="font-mono text-3xl font-black text-yellow-400 tracking-tight">$85,738.00</div>
+            <p class="text-[11px] text-slate-400 mt-1">Harga closing 5 menit sebelumnya yang menjadi garis batas konsolidasi.</p>
+          </div>
+        </div>
+
+        <!-- 2. Harga Live Terkini & Selisih Real-Time -->
+        <div class="bg-dark-900/90 border border-dark-700 rounded-2xl p-4.5 flex flex-col justify-between">
+          <div class="flex items-center justify-between text-xs text-slate-400 pb-1">
+            <span class="font-bold uppercase tracking-wider text-[11px] text-slate-300 flex items-center gap-1.5">
+              <i data-lucide="activity" class="w-3.5 h-3.5 text-blue-400"></i>
+              Harga Live Spot
+            </span>
+            <span id="live-delta-pill" class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">+0.03%</span>
+          </div>
+          <div class="mt-2">
+            <div id="hero-live-price" class="font-mono text-3xl font-black text-white tracking-tight">$85,765.00</div>
+            <div id="live-delta-usd" class="text-[11px] font-mono text-emerald-400 mt-1 flex items-center gap-1 font-semibold">
+              +$27.00 di atas patokan
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Status Terkini (DI ATAS / DI BAWAH) -->
+        <div id="status-card-box" class="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4.5 flex flex-col justify-between">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-300 flex items-center justify-between">
+            <span>Posisi Menuju Cutoff:</span>
+            <span class="text-[10px] font-mono text-slate-400">Real-Time</span>
+          </div>
+          <div class="mt-2 flex items-center space-x-3">
+            <div id="status-icon-wrap" class="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+              <i data-lucide="trending-up" class="w-7 h-7"></i>
+            </div>
             <div>
-              <h2 class="text-base font-bold text-white flex items-center gap-2">
-                <i data-lucide="sliders" class="w-4 h-4 text-cre"></i>
-                Atur Batas & Mulai Ronde Tebakan
-              </h2>
-              <p class="text-xs text-slate-400">Tentukan batas harga acuan, pilih UP/DOWN, lalu duel dengan AI.</p>
-            </div>
-            <span class="text-xs font-mono text-slate-400 px-2 py-1 bg-dark-900 rounded border border-dark-700">Ronde Baru</span>
-          </div>
-
-          <!-- Step 1: Set Custom Threshold -->
-          <div class="space-y-3">
-            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-              1. Tentukan Batas Harga Target (USD)
-            </label>
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 font-mono font-bold">$</div>
-              <input type="number" step="0.01" id="input-threshold" class="w-full pl-8 pr-4 py-3 bg-dark-900 border border-dark-600 rounded-xl font-mono text-lg font-bold text-white focus:outline-none focus:border-cre focus:ring-1 focus:ring-cre" placeholder="85800.00">
-            </div>
-
-            <!-- Quick Adjust Buttons -->
-            <div class="flex flex-wrap gap-2 text-xs">
-              <button onclick="setThresholdCurrent()" class="px-2.5 py-1.5 rounded-lg bg-dark-700 hover:bg-dark-600 text-slate-300 font-medium border border-dark-600 transition">Harga Sekarang</button>
-              <button onclick="adjustThresholdPct(0.05)" class="px-2.5 py-1.5 rounded-lg bg-dark-700 hover:bg-dark-600 text-emerald-400 font-mono border border-dark-600 transition">+0.05%</button>
-              <button onclick="adjustThresholdPct(0.1)" class="px-2.5 py-1.5 rounded-lg bg-dark-700 hover:bg-dark-600 text-emerald-400 font-mono border border-dark-600 transition">+0.10%</button>
-              <button onclick="adjustThresholdPct(-0.05)" class="px-2.5 py-1.5 rounded-lg bg-dark-700 hover:bg-dark-600 text-rose-400 font-mono border border-dark-600 transition">-0.05%</button>
-              <button onclick="adjustThresholdPct(-0.1)" class="px-2.5 py-1.5 rounded-lg bg-dark-700 hover:bg-dark-600 text-rose-400 font-mono border border-dark-600 transition">-0.10%</button>
+              <div id="status-text-headline" class="font-mono text-2xl font-black text-emerald-400">▲ DI ATAS</div>
+              <p id="status-text-sub" class="text-[11px] text-slate-300">Jika konsolidasi sekarang: <strong class="text-white">UP MENANG</strong></p>
             </div>
           </div>
-
-          <!-- Step 2: Timeframe Duration -->
-          <div class="space-y-2">
-            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-              2. Durasi Ronde Tebakan
-            </label>
-            <div class="grid grid-cols-3 gap-3">
-              <button onclick="setDuration(60)" id="btn-dur-60" class="py-2.5 px-3 rounded-xl border border-cre bg-cre/10 text-white font-semibold text-xs transition flex flex-col items-center">
-                <span>1 Menit</span>
-                <span class="text-[10px] text-blue-400 font-normal">Blitz Scalp</span>
-              </button>
-              <button onclick="setDuration(180)" id="btn-dur-180" class="py-2.5 px-3 rounded-xl border border-dark-600 bg-dark-900 text-slate-400 font-semibold text-xs transition flex flex-col items-center hover:border-dark-500">
-                <span>3 Menit</span>
-                <span class="text-[10px] text-slate-500 font-normal">Tactical</span>
-              </button>
-              <button onclick="setDuration(300)" id="btn-dur-300" class="py-2.5 px-3 rounded-xl border border-dark-600 bg-dark-900 text-slate-400 font-semibold text-xs transition flex flex-col items-center hover:border-dark-500">
-                <span>5 Menit</span>
-                <span class="text-[10px] text-slate-500 font-normal">CRE Standard</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Step 3: AI Consultation Box -->
-          <div class="bg-dark-900 border border-dark-700 rounded-xl p-4 space-y-3">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-2">
-                <i data-lucide="bot" class="w-4 h-4 text-blue-400"></i>
-                <span class="text-xs font-bold text-white uppercase tracking-wider">Tebakan AI (9router GLM-5.2)</span>
-              </div>
-              <button onclick="fetchAIPrediction()" id="btn-fetch-ai" class="text-xs text-blue-400 hover:text-blue-300 font-medium flex items-center space-x-1">
-                <i data-lucide="refresh-cw" class="w-3 h-3"></i>
-                <span>Analisis Ulang</span>
-              </button>
-            </div>
-
-            <!-- AI Status Card -->
-            <div id="ai-loading" class="hidden py-4 text-center space-y-2">
-              <div class="inline-block w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              <div class="text-xs text-slate-400">AI sedang mengevaluasi data pasar & batas Anda...</div>
-            </div>
-
-            <div id="ai-result-box" class="space-y-2.5">
-              <div class="flex items-center justify-between">
-                <div>
-                  <span class="text-xs text-slate-400">Pilihan AI:</span>
-                  <span id="ai-choice-badge" class="font-mono text-sm font-extrabold ml-1.5 px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">▲ UP</span>
-                </div>
-                <div class="text-xs text-slate-400 font-mono">
-                  Confidence: <span id="ai-conf-text" class="text-white font-bold">78%</span>
-                </div>
-              </div>
-              <p id="ai-reason-text" class="text-xs text-slate-400 italic bg-dark-800 p-2.5 rounded-lg border border-dark-700">
-                "Harga saat ini berada di bawah batas acuan; resistensi jangka pendek menahan pergerakan."
-              </p>
-            </div>
-          </div>
-
-          <!-- Step 4: User Action (Pick UP or DOWN to Start) -->
-          <div class="space-y-2 pt-2">
-            <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider text-center">
-              Pilih Arah Tebakan Anda untuk Memulai Ronde:
-            </label>
-            <div class="grid grid-cols-2 gap-4">
-              <button onclick="startDuel('UP')" class="py-4 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold text-base shadow-lg shadow-emerald-500/20 flex flex-col items-center justify-center space-y-1 transition transform active:scale-95 group">
-                <div class="flex items-center space-x-2">
-                  <i data-lucide="arrow-up-circle" class="w-5 h-5 text-white"></i>
-                  <span>TEBAK UP (▲)</span>
-                </div>
-                <span class="text-[11px] text-emerald-100 font-normal">Harga akan di atas batas</span>
-              </button>
-
-              <button onclick="startDuel('DOWN')" class="py-4 px-4 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold text-base shadow-lg shadow-rose-500/20 flex flex-col items-center justify-center space-y-1 transition transform active:scale-95 group">
-                <div class="flex items-center space-x-2">
-                  <i data-lucide="arrow-down-circle" class="w-5 h-5 text-white"></i>
-                  <span>TEBAK DOWN (▼)</span>
-                </div>
-                <span class="text-[11px] text-rose-100 font-normal">Harga akan di bawah batas</span>
-              </button>
-            </div>
-          </div>
-
         </div>
 
       </div>
 
-      <!-- RIGHT COLUMN: Real-Time Chart & Match History (5 Cols) -->
-      <div class="lg:col-span-5 space-y-6">
-
-        <!-- Live Price Chart Canvas -->
-        <div class="bg-dark-800 border border-dark-700 rounded-2xl p-5 shadow-xl space-y-4">
-          <div class="flex justify-between items-center">
-            <div class="text-xs font-bold text-slate-300 flex items-center space-x-2">
-              <i data-lucide="activity" class="w-4 h-4 text-emerald-400"></i>
-              <span>Live Tick Chart (Binance)</span>
+      <!-- Action Arena: Tebakan Anda vs Analisis Mendalam AI -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6 pt-6 border-t border-dark-700/80">
+        
+        <!-- KIRI: Interaksi Tebakan User (6 Cols) -->
+        <div class="lg:col-span-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="user-check" class="w-4 h-4 text-emerald-400"></i>
+              <span class="text-xs font-extrabold text-white uppercase tracking-wider">PILIHAN TEBAKAN ANDA (RONDE 5M INI)</span>
             </div>
-            <div class="flex items-center space-x-2 text-[10px] font-mono">
-              <span class="flex items-center gap-1 text-slate-400"><span class="w-2 h-2 rounded-full bg-blue-400"></span> Harga</span>
-              <span class="flex items-center gap-1 text-slate-400"><span class="w-2 h-0.5 bg-yellow-400"></span> Batas</span>
+            <div id="user-choice-status-badge" class="text-xs font-mono font-bold px-2.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
+              Belum Memilih
             </div>
           </div>
 
-          <div class="h-44 w-full">
-            <canvas id="priceChart"></canvas>
-          </div>
-        </div>
+          <p class="text-xs text-slate-400">
+            Tebak apakah harga saat cutoff 5 menit (<span id="user-sub-cutoff-wib" class="text-slate-200 font-mono">--:-- WIB</span>) akan ditutup $\ge$ atau &lt; batas acuan <strong id="user-sub-benchmark" class="text-yellow-400 font-mono">$85,738.00</strong>. Anda dapat mengganti pilihan kapan saja sebelum cutoff!
+          </p>
 
-        <!-- Leaderboard & Score Stats -->
-        <div class="bg-dark-800 border border-dark-700 rounded-2xl p-5 shadow-xl space-y-4">
-          <div class="flex justify-between items-center">
-            <div class="text-xs font-bold text-slate-300 flex items-center space-x-2">
-              <i data-lucide="trophy" class="w-4 h-4 text-yellow-400"></i>
-              <span>Papan Pemenang (Leaderboard)</span>
-            </div>
-            <span id="winrate-badge" class="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Win-rate: 0%</span>
-          </div>
+          <div class="grid grid-cols-2 gap-4 pt-1">
+            <!-- Tombol TEBAK UP -->
+            <button onclick="submitUserChoice('UP')" id="btn-user-up" class="py-4 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold text-base shadow-lg shadow-emerald-500/20 flex flex-col items-center justify-center space-y-1 transition transform active:scale-95 group border border-emerald-400/30">
+              <div class="flex items-center space-x-2">
+                <i data-lucide="arrow-up-circle" class="w-6 h-6 text-white group-hover:scale-110 transition"></i>
+                <span class="text-lg tracking-wide">TEBAK UP (▲)</span>
+              </div>
+              <span class="text-[11px] text-emerald-100 font-normal">Harga $\ge$ Batas saat Cutoff 5m</span>
+            </button>
 
-          <div class="grid grid-cols-3 gap-2.5 text-center">
-            <div class="bg-dark-900 border border-dark-700 p-3 rounded-xl">
-              <div class="text-[10px] text-slate-400 uppercase font-semibold">Kemenangan Anda</div>
-              <div id="stat-user-wins" class="font-mono text-xl font-bold text-emerald-400 mt-0.5">0</div>
-            </div>
-            <div class="bg-dark-900 border border-dark-700 p-3 rounded-xl">
-              <div class="text-[10px] text-slate-400 uppercase font-semibold">Kemenangan AI</div>
-              <div id="stat-ai-wins" class="font-mono text-xl font-bold text-blue-400 mt-0.5">0</div>
-            </div>
-            <div class="bg-dark-900 border border-dark-700 p-3 rounded-xl">
-              <div class="text-[10px] text-slate-400 uppercase font-semibold">Hasil Seri</div>
-              <div id="stat-draws" class="font-mono text-xl font-bold text-slate-400 mt-0.5">0</div>
-            </div>
+            <!-- Tombol TEBAK DOWN -->
+            <button onclick="submitUserChoice('DOWN')" id="btn-user-down" class="py-4 px-4 rounded-2xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold text-base shadow-lg shadow-rose-500/20 flex flex-col items-center justify-center space-y-1 transition transform active:scale-95 group border border-rose-400/30">
+              <div class="flex items-center space-x-2">
+                <i data-lucide="arrow-down-circle" class="w-6 h-6 text-white group-hover:scale-110 transition"></i>
+                <span class="text-lg tracking-wide">TEBAK DOWN (▼)</span>
+              </div>
+              <span class="text-[11px] text-rose-100 font-normal">Harga &lt; Batas saat Cutoff 5m</span>
+            </button>
           </div>
         </div>
 
-        <!-- Match History Table -->
-        <div class="bg-dark-800 border border-dark-700 rounded-2xl p-5 shadow-xl space-y-3">
-          <div class="text-xs font-bold text-slate-300 flex items-center justify-between">
-            <span class="flex items-center space-x-2">
-              <i data-lucide="history" class="w-4 h-4 text-cre"></i>
-              <span>Riwayat Ronde Terakhir</span>
-            </span>
-            <span id="total-rounds-count" class="text-[11px] font-mono text-slate-400">0 Ronde</span>
+        <!-- KANAN: AI Quant Multi-Timeframe Box (6 Cols) -->
+        <div class="lg:col-span-6 bg-dark-900 border border-dark-700 rounded-2xl p-4.5 space-y-3">
+          <div class="flex items-center justify-between border-b border-dark-800 pb-2.5">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="brain-circuit" class="w-4 h-4 text-blue-400"></i>
+              <span class="text-xs font-extrabold text-white uppercase tracking-wider">ANALISIS AI (JANGKA PANJANG & PENDEK)</span>
+            </div>
+            <div class="flex items-center space-x-2 font-mono text-xs">
+              <span id="ai-model-badge" class="text-[10px] px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">cbai/glm-5.2</span>
+              <span class="text-slate-400">Akurasi Quant: <strong id="ai-conf-text" class="text-emerald-400 font-bold">95%</strong></span>
+            </div>
           </div>
 
-          <div class="overflow-y-auto max-h-64 space-y-2 pr-1" id="history-container">
-            <div class="text-center py-8 text-xs text-slate-500 italic">
-              Belum ada ronde yang diselesaikan. Mulai duel tebakan pertama Anda!
+          <!-- AI Prediction Badge & Reasoning -->
+          <div class="space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-slate-400">Pilihan AI Ronde Ini:</span>
+                <span id="ai-choice-badge" class="font-mono text-base font-black px-3 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  ▲ UP
+                </span>
+              </div>
+              <span class="text-[10px] text-slate-400 font-mono">Target Presisi: 99.5%</span>
+            </div>
+
+            <!-- Deep Multi-Timeframe Reasoning Body -->
+            <div class="bg-dark-800/90 rounded-xl p-3 border border-dark-700 text-xs text-slate-300 space-y-2">
+              <div class="text-[10px] uppercase font-bold text-slate-400 flex items-center justify-between">
+                <span>Penalaran Kuantitatif Multi-Timeframe:</span>
+                <span class="text-blue-400 font-mono text-[9px]">1m / 5m / 1h / 24h</span>
+              </div>
+              <p id="ai-reason-text" class="italic text-slate-200 leading-relaxed font-sans">
+                "AI sedang melakukan evaluasi struktur mikro-momentum 1m-5m dan trend hourly..."
+              </p>
             </div>
           </div>
         </div>
@@ -372,9 +290,165 @@
 
     </div>
 
+    <!-- Live Tick Chart vs Benchmark Line (Horizontal Yellow Line) -->
+    <div class="bg-dark-800 border border-dark-700 rounded-2xl p-5 shadow-xl space-y-3">
+      <div class="flex flex-wrap justify-between items-center gap-2">
+        <div class="text-xs font-bold text-slate-300 flex items-center space-x-2">
+          <i data-lucide="line-chart" class="w-4 h-4 text-emerald-400"></i>
+          <span>Live Visual Price Action vs Batas Acuan (Binance 1s Stream)</span>
+        </div>
+        <div class="flex items-center space-x-4 text-[10px] font-mono">
+          <span class="flex items-center gap-1.5 text-slate-300"><span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span> Harga Live ($)</span>
+          <span class="flex items-center gap-1.5 text-yellow-400 font-bold"><span class="w-4 h-0.5 bg-yellow-400"></span> Batas Acuan (Cutoff 5m Lalu)</span>
+        </div>
+      </div>
+
+      <div class="h-44 w-full">
+        <canvas id="priceChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Leaderboard Summary & Winrate Matrix (Persisten di SQLite) -->
+    <div class="bg-dark-800 border border-dark-700 rounded-2xl p-6 shadow-xl space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-4 border-b border-dark-700 pb-3">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+            <i data-lucide="trophy" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white">LEADERBOARD PERSISTEN (SQLITE WAL)</h3>
+            <p class="text-xs text-slate-400">Catatan kemenangan real-time Anda vs AI di setiap konsolidasi 5 menit</p>
+          </div>
+        </div>
+
+        <div class="text-xs font-mono text-slate-400">
+          Data tersimpan di <code class="text-blue-400">data/prediction.db</code>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+        <div class="bg-dark-900 border border-dark-700 p-3.5 rounded-xl">
+          <div class="text-[10px] uppercase font-bold text-slate-400">Total Ronde</div>
+          <div id="stat-total-rounds" class="font-mono text-2xl font-black text-white mt-0.5">0</div>
+          <div class="text-[10px] text-slate-500 mt-0.5"><span id="stat-consolidated-rounds">0</span> Selesai</div>
+        </div>
+
+        <div class="bg-dark-900 border border-dark-700 p-3.5 rounded-xl">
+          <div class="text-[10px] uppercase font-bold text-emerald-400">Anda Menang Solo</div>
+          <div id="stat-human-wins" class="font-mono text-2xl font-black text-emerald-400 mt-0.5">0</div>
+          <div class="text-[10px] text-slate-500 mt-0.5">Akurasi Solo</div>
+        </div>
+
+        <div class="bg-dark-900 border border-dark-700 p-3.5 rounded-xl">
+          <div class="text-[10px] uppercase font-bold text-blue-400">AI Menang Solo</div>
+          <div id="stat-ai-wins" class="font-mono text-2xl font-black text-blue-400 mt-0.5">0</div>
+          <div class="text-[10px] text-slate-500 mt-0.5">9router Model</div>
+        </div>
+
+        <div class="bg-dark-900 border border-dark-700 p-3.5 rounded-xl">
+          <div class="text-[10px] uppercase font-bold text-purple-400">Keduanya Benar</div>
+          <div id="stat-draw-wins" class="font-mono text-2xl font-black text-purple-400 mt-0.5">0</div>
+          <div class="text-[10px] text-slate-500 mt-0.5">Konsensus</div>
+        </div>
+
+        <div class="bg-dark-900 border border-dark-700 p-3.5 rounded-xl">
+          <div class="text-[10px] uppercase font-bold text-emerald-400">Win-rate Anda</div>
+          <div id="stat-human-wr" class="font-mono text-2xl font-black text-emerald-400 mt-0.5">0%</div>
+          <div class="text-[10px] text-slate-500 mt-0.5">Ronde Partisipasi</div>
+        </div>
+
+        <div class="bg-dark-900 border border-dark-700 p-3.5 rounded-xl">
+          <div class="text-[10px] uppercase font-bold text-blue-400">Win-rate AI</div>
+          <div id="stat-ai-wr" class="font-mono text-2xl font-black text-blue-400 mt-0.5">0%</div>
+          <div class="text-[10px] text-slate-500 mt-0.5">Kumulatif Presisi</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Match History Table Section -->
+    <div class="bg-dark-800 border border-dark-700 rounded-2xl p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-dark-700 pb-3">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="history" class="w-4 h-4 text-cre"></i>
+          <h3 class="text-sm font-bold text-white uppercase tracking-wider">Riwayat Konsolidasi Ronde 5 Menit (SQLite)</h3>
+        </div>
+        <span class="text-xs text-slate-400 font-mono">Format: WIB (UTC+7)</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead>
+            <tr class="border-b border-dark-700 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
+              <th class="py-2.5 px-3">ID Ronde</th>
+              <th class="py-2.5 px-3">Mulai (WIB)</th>
+              <th class="py-2.5 px-3">Cutoff (WIB)</th>
+              <th class="py-2.5 px-3 text-right">Batas Patokan</th>
+              <th class="py-2.5 px-3 text-right">Harga Akhir</th>
+              <th class="py-2.5 px-3 text-center">Tebakan Anda</th>
+              <th class="py-2.5 px-3 text-center">Pilihan AI</th>
+              <th class="py-2.5 px-3 text-center">Hasil Nyata</th>
+              <th class="py-2.5 px-3 text-center">Pemenang</th>
+              <th class="py-2.5 px-3 text-center">Analisis AI</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody" class="divide-y divide-dark-700/60 font-mono">
+            <tr>
+              <td colspan="10" class="text-center py-8 text-slate-500 italic font-sans">
+                Memuat riwayat dari database SQLite...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </main>
 
-  <!-- Modal: CRE Workflow Execution Output -->
+  <!-- Modal: Detail Analisis Mendalam AI -->
+  <div id="ai-detail-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-dark-800 border border-dark-600 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-dark-700 pb-3">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="brain-circuit" class="w-5 h-5 text-blue-400"></i>
+          <div>
+            <h3 class="text-sm font-bold text-white">Detail Analisis Multi-Timeframe AI</h3>
+            <p id="modal-round-id" class="text-xs text-slate-400 font-mono">RND-XXXX</p>
+          </div>
+        </div>
+        <button onclick="closeAIDetailModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div class="grid grid-cols-2 gap-2 bg-dark-900 p-3 rounded-xl border border-dark-700">
+          <div>
+            <span class="text-slate-400">Pilihan AI:</span>
+            <span id="modal-ai-choice" class="font-mono font-bold text-emerald-400 ml-1">▲ UP</span>
+          </div>
+          <div>
+            <span class="text-slate-400">Confidence:</span>
+            <span id="modal-ai-confidence" class="font-mono font-bold text-white ml-1">95%</span>
+          </div>
+          <div class="col-span-2 text-[11px] text-slate-400">
+            Model: <span id="modal-ai-model" class="font-mono text-blue-400 font-semibold">cbai/glm-5.2</span>
+          </div>
+        </div>
+
+        <div class="space-y-1">
+          <span class="text-slate-400 font-semibold uppercase text-[10px] tracking-wider">Penalaran Kuantitatif Lengkap:</span>
+          <p id="modal-ai-reasoning" class="text-slate-200 bg-dark-900 p-3.5 rounded-xl border border-dark-700 leading-relaxed font-sans italic whitespace-pre-wrap">
+            --
+          </p>
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-2">
+        <button onclick="closeAIDetailModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-dark-700 hover:bg-dark-600 text-slate-300 transition">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: CRE Workflow Simulation -->
   <div id="cre-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-dark-800 border border-dark-600 rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-dark-700 pb-3">
@@ -384,17 +458,13 @@
           </div>
           <div>
             <h3 class="text-sm font-bold text-white">Chainlink CRE Simulation Console</h3>
-            <p class="text-xs text-slate-400">Eksekusi native WASM workflow di server lokal</p>
+            <p class="text-xs text-slate-400">Simulasi native Go WASM workflow di server</p>
           </div>
         </div>
         <button onclick="closeCREModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
 
       <div class="space-y-2">
-        <div class="flex justify-between items-center text-xs">
-          <span class="text-slate-400">Perintah yang dieksekusi:</span>
-          <span class="font-mono text-slate-300 bg-dark-900 px-2 py-0.5 rounded border border-dark-700">cre workflow simulate prediction-workflow --target staging-settings</span>
-        </div>
         <pre id="cre-output-log" class="font-mono text-xs text-emerald-400 bg-dark-900 p-4 rounded-xl border border-dark-700 h-64 overflow-y-auto whitespace-pre-wrap">Tekan tombol di bawah untuk menjalankan simulasi native Chainlink CRE...</pre>
       </div>
 
@@ -410,17 +480,14 @@
 
   <!-- Application Script -->
   <script>
-    // App State
     let currentSymbol = 'BTCUSDT';
-    let currentPrice = 85820.00;
-    let selectedDuration = 60; // 60s default
-    let aiPrediction = { choice: 'UP', confidence: 75, reasoning: '' };
+    let currentPrice = 85760.00;
     let activeRound = null;
-    let roundTimer = null;
-    let priceHistory = [];
     let priceChart = null;
+    let roundsCache = [];
+    let lastConsolidatedCount = -1;
 
-    // Web Audio Synthesizer for victory/loss sound effects
+    // Sound FX Synthesis
     function playSound(type) {
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -431,50 +498,48 @@
 
         if (type === 'win') {
           osc.type = 'triangle';
-          osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
-          osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1); // E5
-          osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2); // G5
-          osc.frequency.setValueAtTime(1046.50, ctx.currentTime + 0.3); // C6
+          osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+          osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+          osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);
+          osc.frequency.setValueAtTime(1046.50, ctx.currentTime + 0.3);
           gain.gain.setValueAtTime(0.3, ctx.currentTime);
           gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.6);
           osc.start();
           osc.stop(ctx.currentTime + 0.6);
-        } else if (type === 'loss') {
-          osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(349.23, ctx.currentTime); // F4
-          osc.frequency.setValueAtTime(311.13, ctx.currentTime + 0.15); // Eb4
-          osc.frequency.setValueAtTime(261.63, ctx.currentTime + 0.3); // C4
-          gain.gain.setValueAtTime(0.2, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+        } else if (type === 'click') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(800, ctx.currentTime);
+          gain.gain.setValueAtTime(0.15, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
           osc.start();
-          osc.stop(ctx.currentTime + 0.5);
+          osc.stop(ctx.currentTime + 0.08);
         }
       } catch (e) {}
     }
 
-    // Chart Initialization
+    // Chart.js init
     function initChart() {
       const ctx = document.getElementById('priceChart').getContext('2d');
       priceChart = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: Array(25).fill(''),
+          labels: Array(40).fill(''),
           datasets: [
             {
-              label: 'Price',
-              data: Array(25).fill(currentPrice),
+              label: 'Harga Live',
+              data: Array(40).fill(currentPrice),
               borderColor: '#38bdf8',
-              borderWidth: 2,
-              tension: 0.3,
+              borderWidth: 2.2,
+              tension: 0.25,
               pointRadius: 0,
               fill: false
             },
             {
-              label: 'Threshold',
-              data: Array(25).fill(currentPrice),
+              label: 'Batas Patokan (5m Lalu)',
+              data: Array(40).fill(currentPrice),
               borderColor: '#eab308',
-              borderWidth: 1.5,
-              borderDash: [4, 4],
+              borderWidth: 2,
+              borderDash: [5, 4],
               pointRadius: 0,
               fill: false
             }
@@ -487,7 +552,7 @@
           scales: {
             x: { display: false },
             y: {
-              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              grid: { color: 'rgba(255, 255, 255, 0.06)' },
               ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 } }
             }
           },
@@ -496,322 +561,265 @@
       });
     }
 
-    // Polling Live Price
-    async function fetchLivePrice() {
+    // Real-Time 5-Minute Active Round & Price Polling
+    async function syncActiveRoundAndPrice() {
       try {
-        const res = await fetch(`/api/price?symbol=${currentSymbol}`);
+        const res = await fetch(`/api/rounds/active?symbol=${currentSymbol}`);
         const data = await res.json();
-        if (data.price) {
-          currentPrice = data.price;
-          document.getElementById('live-price').textContent = `$${currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-          
-          const chg = data.change_24h_pct;
-          const chgEl = document.getElementById('live-change');
-          chgEl.textContent = `${chg >= 0 ? '+' : ''}${chg.toFixed(2)}%`;
-          chgEl.className = `font-mono text-xs font-semibold ${chg >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
 
-          // Update chart dataset
-          if (priceChart) {
-            priceChart.data.datasets[0].data.push(currentPrice);
-            priceChart.data.datasets[0].data.shift();
-
-            const thresh = parseFloat(document.getElementById('input-threshold').value) || currentPrice;
-            priceChart.data.datasets[1].data.push(thresh);
-            priceChart.data.datasets[1].data.shift();
-            priceChart.update();
-          }
-
-          // If round is active, update live comparison
-          if (activeRound) {
-            updateActiveRoundGauge();
-          }
+        if (data.server_time_wib) {
+          document.getElementById('clock-wib').textContent = data.server_time_wib;
         }
+
+        if (data.live_price) {
+          currentPrice = data.live_price;
+          document.getElementById('live-price').textContent = `$${currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+          document.getElementById('hero-live-price').textContent = `$${currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+
+        activeRound = data.active_round;
+        if (activeRound) {
+          renderHeroActiveRound(activeRound, data);
+        }
+
+        // Update Chart
+        if (priceChart) {
+          priceChart.data.datasets[0].data.push(currentPrice);
+          priceChart.data.datasets[0].data.shift();
+
+          const bench = activeRound ? activeRound.threshold_price : currentPrice;
+          priceChart.data.datasets[1].data.push(bench);
+          priceChart.data.datasets[1].data.shift();
+          priceChart.update();
+        }
+
       } catch (e) {}
     }
 
-    // Set Asset Symbol
-    function changeSymbol(sym) {
-      currentSymbol = sym;
-      ['btc', 'eth', 'sol'].forEach(id => {
-        const btn = document.getElementById(`btn-${id}`);
-        if (`${id.toUpperCase()}USDT` === sym) {
-          btn.className = 'px-2.5 py-1 text-xs font-semibold rounded transition-all bg-cre text-white shadow';
-        } else {
-          btn.className = 'px-2.5 py-1 text-xs font-semibold rounded transition-all text-slate-400 hover:text-white';
-        }
-      });
-      document.getElementById('label-symbol').textContent = `${sym.replace('USDT', '')}/USDT`;
-      fetchLivePrice().then(() => {
-        setThresholdCurrent();
-        fetchAIPrediction();
-      });
+    function renderHeroActiveRound(r, data) {
+      document.getElementById('hero-round-id').textContent = `${r.symbol} • ${r.id}`;
+      document.getElementById('hero-start-wib').textContent = r.start_time_wib;
+      document.getElementById('hero-cutoff-wib').textContent = r.cutoff_time_wib;
+      document.getElementById('user-sub-cutoff-wib').textContent = r.cutoff_time_wib;
+      
+      const benchStr = `$${r.threshold_price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('benchmark-price').textContent = benchStr;
+      document.getElementById('user-sub-benchmark').textContent = benchStr;
+
+      // Delta & Status
+      const deltaUSD = data.delta_usd || (currentPrice - r.threshold_price);
+      const deltaPct = data.delta_pct || ((deltaUSD / r.threshold_price) * 100);
+      const isAbove = deltaUSD >= 0;
+
+      const deltaPill = document.getElementById('live-delta-pill');
+      deltaPill.textContent = `${deltaPct >= 0 ? '+' : ''}${deltaPct.toFixed(3)}%`;
+      deltaPill.className = `text-[10px] font-mono font-bold px-2 py-0.5 rounded ${isAbove ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'}`;
+
+      const deltaText = document.getElementById('live-delta-usd');
+      deltaText.textContent = `${deltaUSD >= 0 ? '+' : ''}$${Math.abs(deltaUSD).toFixed(2)} ${isAbove ? 'di atas patokan' : 'di bawah patokan'}`;
+      deltaText.className = `text-[11px] font-mono mt-1 flex items-center gap-1 font-semibold ${isAbove ? 'text-emerald-400' : 'text-rose-400'}`;
+
+      const cardBox = document.getElementById('status-card-box');
+      const iconWrap = document.getElementById('status-icon-wrap');
+      const textHeadline = document.getElementById('status-text-headline');
+      const textSub = document.getElementById('status-text-sub');
+
+      if (isAbove) {
+        cardBox.className = 'bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4.5 flex flex-col justify-between';
+        iconWrap.className = 'w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400';
+        iconWrap.innerHTML = '<i data-lucide="trending-up" class="w-7 h-7"></i>';
+        textHeadline.textContent = '▲ DI ATAS';
+        textHeadline.className = 'font-mono text-2xl font-black text-emerald-400';
+        textSub.innerHTML = 'Jika konsolidasi sekarang: <strong class="text-white">UP MENANG</strong>';
+      } else {
+        cardBox.className = 'bg-rose-500/10 border border-rose-500/30 rounded-2xl p-4.5 flex flex-col justify-between';
+        iconWrap.className = 'w-12 h-12 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400';
+        iconWrap.innerHTML = '<i data-lucide="trending-down" class="w-7 h-7"></i>';
+        textHeadline.textContent = '▼ DI BAWAH';
+        textHeadline.className = 'font-mono text-2xl font-black text-rose-400';
+        textSub.innerHTML = 'Jika konsolidasi sekarang: <strong class="text-white">DOWN MENANG</strong>';
+      }
+
+      // Countdown & Progress Bar (300 sec duration)
+      const remaining = Math.max(0, data.remaining_sec || 0);
+      const m = Math.floor(remaining / 60);
+      const s = remaining % 60;
+      document.getElementById('countdown-text').textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+
+      const progressPct = Math.min(100, Math.max(0, (remaining / 300) * 100));
+      document.getElementById('countdown-progress-bar').style.width = `${progressPct}%`;
+
+      // User Choice Status & Highlight
+      const userBadge = document.getElementById('user-choice-status-badge');
+      const btnUp = document.getElementById('btn-user-up');
+      const btnDown = document.getElementById('btn-user-down');
+
+      if (r.user_choice === 'UP') {
+        userBadge.textContent = 'PILIHAN ANDA: ▲ UP';
+        userBadge.className = 'text-xs font-mono font-bold px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40';
+        btnUp.className = 'py-4 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-400 text-white font-bold text-base shadow-lg shadow-emerald-500/40 flex flex-col items-center justify-center space-y-1 transition transform active:scale-95 group border-2 border-white ring-2 ring-emerald-400';
+        btnDown.className = 'py-4 px-4 rounded-2xl bg-dark-800 hover:bg-dark-700 text-slate-400 font-bold text-base flex flex-col items-center justify-center space-y-1 transition transform active:scale-95 group border border-dark-600 opacity-60';
+      } else if (r.user_choice === 'DOWN') {
+        userBadge.textContent = 'PILIHAN ANDA: ▼ DOWN';
+        userBadge.className = 'text-xs font-mono font-bold px-2.5 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/40';
+        btnDown.className = 'py-4 px-4 rounded-2xl bg-gradient-to-r from-rose-500 to-rose-400 text-white font-bold text-base shadow-lg shadow-rose-500/40 flex flex-col items-center justify-center space-y-1 transition transform active:scale-95 group border-2 border-white ring-2 ring-rose-400';
+        btnUp.className = 'py-4 px-4 rounded-2xl bg-dark-800 hover:bg-dark-700 text-slate-400 font-bold text-base flex flex-col items-center justify-center space-y-1 transition transform active:scale-95 group border border-dark-600 opacity-60';
+      } else {
+        userBadge.textContent = 'Belum Memilih';
+        userBadge.className = 'text-xs font-mono font-bold px-2.5 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700';
+        btnUp.className = 'py-4 px-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-bold text-base shadow-lg shadow-emerald-500/20 flex flex-col items-center justify-center space-y-1 transition transform active:scale-95 group border border-emerald-400/30';
+        btnDown.className = 'py-4 px-4 rounded-2xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold text-base shadow-lg shadow-rose-500/20 flex flex-col items-center justify-center space-y-1 transition transform active:scale-95 group border border-rose-400/30';
+      }
+
+      // AI Analysis
+      const aiBadge = document.getElementById('ai-choice-badge');
+      if (r.ai_choice === 'UP') {
+        aiBadge.textContent = '▲ UP';
+        aiBadge.className = 'font-mono text-base font-black px-3 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+      } else if (r.ai_choice === 'DOWN') {
+        aiBadge.textContent = '▼ DOWN';
+        aiBadge.className = 'font-mono text-base font-black px-3 py-0.5 rounded-lg bg-rose-500/20 text-rose-400 border border-rose-500/30';
+      } else {
+        aiBadge.textContent = 'Sedang Menganalisis...';
+        aiBadge.className = 'font-mono text-xs font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400';
+      }
+
+      document.getElementById('ai-conf-text').textContent = `${r.ai_confidence > 0 ? r.ai_confidence : 95}%`;
+      document.getElementById('ai-reason-text').textContent = `"${r.ai_reasoning || 'AI sedang memproses analisis...'}"`;
+      document.getElementById('ai-model-badge').textContent = r.ai_model || 'cbai/glm-5.2';
+
+      lucide.createIcons();
     }
 
-    // Set Threshold
-    function setThresholdCurrent() {
-      document.getElementById('input-threshold').value = currentPrice.toFixed(2);
-      fetchAIPrediction();
-    }
+    // Submit User Choice for Active Round
+    async function submitUserChoice(choice) {
+      if (!activeRound) {
+        alert('Menunggu inisialisasi ronde aktif...');
+        return;
+      }
 
-    function adjustThresholdPct(pct) {
-      const cur = parseFloat(document.getElementById('input-threshold').value) || currentPrice;
-      const target = cur * (1 + pct / 100);
-      document.getElementById('input-threshold').value = target.toFixed(2);
-      fetchAIPrediction();
-    }
-
-    // Duration Selector
-    function setDuration(sec) {
-      selectedDuration = sec;
-      [60, 180, 300].forEach(s => {
-        const btn = document.getElementById(`btn-dur-${s}`);
-        if (s === sec) {
-          btn.className = 'py-2.5 px-3 rounded-xl border border-cre bg-cre/10 text-white font-semibold text-xs transition flex flex-col items-center';
-        } else {
-          btn.className = 'py-2.5 px-3 rounded-xl border border-dark-600 bg-dark-900 text-slate-400 font-semibold text-xs transition flex flex-col items-center hover:border-dark-500';
-        }
-      });
-      fetchAIPrediction();
-    }
-
-    // Fetch AI Prediction
-    async function fetchAIPrediction() {
-      const threshold = parseFloat(document.getElementById('input-threshold').value) || currentPrice;
-      document.getElementById('ai-loading').classList.remove('hidden');
-      document.getElementById('ai-result-box').classList.add('hidden');
+      playSound('click');
 
       try {
-        const res = await fetch('/api/ai-predict', {
+        const res = await fetch('/api/rounds/bet', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            symbol: currentSymbol,
-            current_price: currentPrice,
-            threshold_price: threshold,
-            duration_sec: selectedDuration
+            round_id: activeRound.id,
+            choice: choice
           })
         });
         const data = await res.json();
-        aiPrediction = data;
-
-        const badge = document.getElementById('ai-choice-badge');
-        if (data.choice === 'UP') {
-          badge.textContent = '▲ UP';
-          badge.className = 'font-mono text-sm font-extrabold ml-1.5 px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
-        } else {
-          badge.textContent = '▼ DOWN';
-          badge.className = 'font-mono text-sm font-extrabold ml-1.5 px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30';
+        if (data.success) {
+          activeRound.user_choice = choice;
+          syncActiveRoundAndPrice();
         }
-
-        document.getElementById('ai-conf-text').textContent = `${data.confidence || 75}%`;
-        document.getElementById('ai-reason-text').textContent = `"${data.reasoning || ''}" — [${data.provider}]`;
       } catch (e) {
-      } finally {
-        document.getElementById('ai-loading').classList.add('hidden');
-        document.getElementById('ai-result-box').classList.remove('hidden');
+        alert('Gagal mengunci tebakan: ' + e);
       }
     }
 
-    // Start Prediction Duel
-    function startDuel(userChoice) {
-      const threshold = parseFloat(document.getElementById('input-threshold').value) || currentPrice;
-
-      activeRound = {
-        id: `RND-${Math.floor(1000 + Math.random() * 9000)}`,
-        symbol: currentSymbol,
-        startPrice: currentPrice,
-        thresholdPrice: threshold,
-        durationSec: selectedDuration,
-        userChoice: userChoice,
-        aiChoice: aiPrediction.choice,
-        aiConfidence: aiPrediction.confidence,
-        aiReasoning: aiPrediction.reasoning,
-        remainingSec: selectedDuration
-      };
-
-      // Switch Panels
-      document.getElementById('panel-setup-round').classList.add('hidden');
-      document.getElementById('panel-active-round').classList.remove('hidden');
-
-      document.getElementById('active-round-id').textContent = activeRound.id;
-      document.getElementById('active-threshold-display').textContent = `$${threshold.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-      
-      const userChoiceEl = document.getElementById('active-user-choice');
-      userChoiceEl.textContent = userChoice === 'UP' ? '▲ UP' : '▼ DOWN';
-      userChoiceEl.className = `font-mono text-lg font-black mt-1 ${userChoice === 'UP' ? 'text-emerald-400' : 'text-rose-400'}`;
-
-      const aiChoiceEl = document.getElementById('active-ai-choice');
-      aiChoiceEl.textContent = activeRound.aiChoice === 'UP' ? '▲ UP' : '▼ DOWN';
-      aiChoiceEl.className = `font-mono text-lg font-black mt-1 ${activeRound.aiChoice === 'UP' ? 'text-emerald-400' : 'text-rose-400'}`;
-
-      updateActiveRoundGauge();
-
-      // Start Countdown Timer
-      clearInterval(roundTimer);
-      roundTimer = setInterval(() => {
-        activeRound.remainingSec--;
-        updateCountdownDisplay(activeRound.remainingSec);
-
-        if (activeRound.remainingSec <= 0) {
-          clearInterval(roundTimer);
-          resolveRound();
-        }
-      }, 1000);
-
-      updateCountdownDisplay(activeRound.remainingSec);
-    }
-
-    function updateCountdownDisplay(sec) {
-      const m = Math.floor(sec / 60).toString().padStart(2, '0');
-      const s = (sec % 60).toString().padStart(2, '0');
-      document.getElementById('countdown-timer').textContent = `${m}:${s}`;
-    }
-
-    function updateActiveRoundGauge() {
-      if (!activeRound) return;
-      document.getElementById('active-current-display').textContent = `$${currentPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-      
-      const diff = currentPrice - activeRound.thresholdPrice;
-      const pct = (diff / activeRound.thresholdPrice) * 100;
-      const statusText = document.getElementById('active-status-text');
-      const gaugeBar = document.getElementById('gauge-bar');
-
-      if (diff >= 0) {
-        statusText.textContent = `▲ DI ATAS TARGET (+${pct.toFixed(3)}%)`;
-        statusText.className = 'text-emerald-400 font-bold';
-        gaugeBar.className = 'h-full bg-emerald-500 transition-all duration-300 w-3/4';
-      } else {
-        statusText.textContent = `▼ DI BAWAH TARGET (${pct.toFixed(3)}%)`;
-        statusText.className = 'text-rose-400 font-bold';
-        gaugeBar.className = 'h-full bg-rose-500 transition-all duration-300 w-1/4';
-      }
-
-      // Live leader
-      const userLeading = (diff >= 0 && activeRound.userChoice === 'UP') || (diff < 0 && activeRound.userChoice === 'DOWN');
-      const aiLeading = (diff >= 0 && activeRound.aiChoice === 'UP') || (diff < 0 && activeRound.aiChoice === 'DOWN');
-
-      document.getElementById('active-user-status').textContent = userLeading ? '✓ Posisi Benar' : '✗ Posisi Salah';
-      document.getElementById('active-user-status').className = `text-[11px] font-semibold mt-0.5 ${userLeading ? 'text-emerald-400' : 'text-slate-500'}`;
-
-      document.getElementById('active-ai-status').textContent = aiLeading ? '✓ Posisi Benar' : '✗ Posisi Salah';
-      document.getElementById('active-ai-status').className = `text-[11px] font-semibold mt-0.5 ${aiLeading ? 'text-emerald-400' : 'text-slate-500'}`;
-    }
-
-    // Resolve Round
-    async function resolveRound() {
-      const finalPrice = currentPrice;
-      const roundPayload = {
-        id: activeRound.id,
-        symbol: activeRound.symbol,
-        start_price: activeRound.startPrice,
-        threshold_price: activeRound.thresholdPrice,
-        final_price: finalPrice,
-        duration_sec: activeRound.durationSec,
-        user_choice: activeRound.userChoice,
-        ai_choice: activeRound.aiChoice,
-        ai_confidence: activeRound.aiConfidence,
-        ai_reasoning: activeRound.aiReasoning
-      };
-
-      try {
-        const res = await fetch('/api/rounds', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(roundPayload)
-        });
-        const saved = await res.json();
-        
-        // Show result feedback
-        if (saved.user_won) {
-          playSound('win');
-          confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-        } else {
-          playSound('loss');
-        }
-
-        alert(`🏁 RONDE SELESAI!\nHarga Akhir: $${finalPrice.toFixed(2)}\nBatas: $${activeRound.thresholdPrice.toFixed(2)}\nHasil: ${saved.actual_outcome}\n\nStatus: ${saved.outcome_summary.replace('_', ' ')}!`);
-        
-        loadHistoryAndStats();
-      } catch (e) {}
-
-      // Reset to setup panel
-      activeRound = null;
-      document.getElementById('panel-active-round').classList.add('hidden');
-      document.getElementById('panel-setup-round').classList.remove('hidden');
-    }
-
-    function abortRound() {
-      if (confirm('Batalkan ronde tebakan ini?')) {
-        clearInterval(roundTimer);
-        activeRound = null;
-        document.getElementById('panel-active-round').classList.add('hidden');
-        document.getElementById('panel-setup-round').classList.remove('hidden');
-      }
-    }
-
-    // Load History and Scoreboard
-    async function loadHistoryAndStats() {
+    // Load History & Leaderboard from SQLite
+    async function loadRoundsAndStats() {
       try {
         const res = await fetch('/api/rounds');
         const data = await res.json();
-        const sb = data.scoreboard || { user_wins: 0, ai_wins: 0, draws: 0, total_rounds: 0 };
+        roundsCache = data.rounds || [];
+        const lb = data.leaderboard || {};
 
-        document.getElementById('score-user').textContent = sb.user_wins;
-        document.getElementById('score-ai').textContent = sb.ai_wins;
-        document.getElementById('stat-user-wins').textContent = sb.user_wins;
-        document.getElementById('stat-ai-wins').textContent = sb.ai_wins;
-        document.getElementById('stat-draws').textContent = sb.draws;
-        document.getElementById('total-rounds-count').textContent = `${sb.total_rounds} Ronde`;
-
-        const wr = sb.total_rounds > 0 ? ((sb.user_wins / sb.total_rounds) * 100).toFixed(0) : 0;
-        document.getElementById('winrate-badge').textContent = `Win-rate: ${wr}%`;
-
-        // Render history list
-        const container = document.getElementById('history-container');
-        if (!data.rounds || data.rounds.length === 0) {
-          container.innerHTML = `<div class="text-center py-8 text-xs text-slate-500 italic">Belum ada ronde yang diselesaikan. Mulai duel tebakan pertama Anda!</div>`;
-          return;
-        }
-
-        container.innerHTML = data.rounds.map(r => {
-          let badge = '';
-          if (r.outcome_summary === 'HUMAN_WON') {
-            badge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">🏆 Anda Menang</span>`;
-          } else if (r.outcome_summary === 'AI_WON') {
-            badge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">🤖 AI Menang</span>`;
-          } else if (r.outcome_summary === 'DRAW_WIN') {
-            badge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30">🤝 Seri (Keduanya Benar)</span>`;
-          } else {
-            badge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-dark-700 text-slate-400 border border-dark-600">❌ Seri (Keduanya Salah)</span>`;
+        // Check if new consolidation occurred for victory sounds
+        const currentConsolidated = lb.consolidated_rounds || 0;
+        if (lastConsolidatedCount >= 0 && currentConsolidated > lastConsolidatedCount) {
+          if (roundsCache.length > 0 && roundsCache[0].user_won) {
+            playSound('win');
+            confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } });
           }
+        }
+        lastConsolidatedCount = currentConsolidated;
 
-          return `
-            <div class="bg-dark-900 border border-dark-700 p-3 rounded-xl space-y-1.5 text-xs">
-              <div class="flex justify-between items-center">
-                <span class="font-mono font-bold text-white">${r.symbol} • ${r.id}</span>
-                ${badge}
-              </div>
-              <div class="flex justify-between text-slate-400 text-[11px] font-mono">
-                <span>Batas: $${r.threshold_price.toFixed(2)}</span>
-                <span>Akhir: $${r.final_price.toFixed(2)} (${r.actual_outcome})</span>
-              </div>
-              <div class="flex justify-between items-center text-[11px] pt-1 border-t border-dark-800">
-                <span>Anda: <strong class="${r.user_choice === 'UP' ? 'text-emerald-400' : 'text-rose-400'}">${r.user_choice}</strong></span>
-                <span>AI: <strong class="${r.ai_choice === 'UP' ? 'text-emerald-400' : 'text-rose-400'}">${r.ai_choice}</strong></span>
-                <span class="text-slate-500">${r.timestamp}</span>
-              </div>
-            </div>
-          `;
-        }).join('');
+        // Leaderboard Stats
+        document.getElementById('stat-total-rounds').textContent = lb.total_rounds || 0;
+        document.getElementById('stat-consolidated-rounds').textContent = lb.consolidated_rounds || 0;
+        document.getElementById('stat-human-wins').textContent = lb.human_solo_wins || 0;
+        document.getElementById('stat-ai-wins').textContent = lb.ai_solo_wins || 0;
+        document.getElementById('stat-draw-wins').textContent = lb.draw_wins || 0;
+        document.getElementById('stat-human-wr').textContent = `${lb.human_winrate_pct || 0}%`;
+        document.getElementById('stat-ai-wr').textContent = `${lb.ai_winrate_pct || 0}%`;
+
+        document.getElementById('score-user-pct').textContent = `${lb.human_winrate_pct || 0}%`;
+        document.getElementById('score-ai-pct').textContent = `${lb.ai_winrate_pct || 0}%`;
+
+        // Render History Table
+        renderHistoryTable(roundsCache);
 
       } catch (e) {}
     }
 
-    // CRE Modal functions
+    function renderHistoryTable(rounds) {
+      const tbody = document.getElementById('history-tbody');
+      if (rounds.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" class="text-center py-8 text-slate-500 italic font-sans">Belum ada riwayat konsolidasi tersimpan.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = rounds.map(r => {
+        let badge = '';
+        if (r.status === 'ACTIVE') {
+          badge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-400/20 text-amber-400 border border-amber-400/30">⏳ Sedang Berjalan</span>`;
+        } else if (r.outcome_summary === 'HUMAN_WON') {
+          badge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">🏆 Anda Menang</span>`;
+        } else if (r.outcome_summary === 'AI_WON') {
+          badge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">🤖 AI Menang</span>`;
+        } else if (r.outcome_summary === 'DRAW_WIN') {
+          badge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30">🤝 Keduanya Benar</span>`;
+        } else {
+          badge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-dark-700 text-slate-400 border border-dark-600">❌ Keduanya Salah</span>`;
+        }
+
+        const finalPriceStr = r.final_price > 0 ? `$${r.final_price.toFixed(2)}` : '--';
+        const userChoiceStr = (r.user_choice && r.user_choice !== 'PENDING') ? r.user_choice : '<span class="text-slate-600">-</span>';
+
+        return `
+          <tr class="hover:bg-dark-700/30 transition text-slate-300">
+            <td class="py-2.5 px-3 font-bold text-white">${r.id}</td>
+            <td class="py-2.5 px-3 text-slate-400">${r.start_time_wib}</td>
+            <td class="py-2.5 px-3 text-slate-400">${r.cutoff_time_wib}</td>
+            <td class="py-2.5 px-3 text-right text-yellow-400 font-bold">$${r.threshold_price.toFixed(2)}</td>
+            <td class="py-2.5 px-3 text-right text-white">${finalPriceStr}</td>
+            <td class="py-2.5 px-3 text-center font-bold ${r.user_choice === 'UP' ? 'text-emerald-400' : (r.user_choice === 'DOWN' ? 'text-rose-400' : 'text-slate-500')}">${userChoiceStr}</td>
+            <td class="py-2.5 px-3 text-center font-bold ${r.ai_choice === 'UP' ? 'text-emerald-400' : 'text-rose-400'}">${r.ai_choice || '--'}</td>
+            <td class="py-2.5 px-3 text-center font-bold text-slate-300">${r.actual_outcome}</td>
+            <td class="py-2.5 px-3 text-center">${badge}</td>
+            <td class="py-2.5 px-3 text-center">
+              <button onclick="showAIDetail('${r.id}')" class="px-2 py-0.5 rounded bg-dark-700 hover:bg-dark-600 text-blue-400 hover:text-white transition text-[10px]">Detail</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function showAIDetail(roundId) {
+      const r = roundsCache.find(x => x.id === roundId);
+      if (!r) return;
+
+      document.getElementById('modal-round-id').textContent = `${r.symbol} • ${r.id}`;
+      document.getElementById('modal-ai-choice').textContent = r.ai_choice === 'UP' ? '▲ UP' : '▼ DOWN';
+      document.getElementById('modal-ai-choice').className = `font-mono font-bold ml-1 ${r.ai_choice === 'UP' ? 'text-emerald-400' : 'text-rose-400'}`;
+      document.getElementById('modal-ai-confidence').textContent = `${r.ai_confidence || 95}%`;
+      document.getElementById('modal-ai-model').textContent = r.ai_model || 'cbai/glm-5.2';
+      document.getElementById('modal-ai-reasoning').textContent = r.ai_reasoning || 'Tidak ada catatan analisis tersimpan.';
+
+      document.getElementById('ai-detail-modal').classList.remove('hidden');
+    }
+
+    function closeAIDetailModal() {
+      document.getElementById('ai-detail-modal').classList.add('hidden');
+    }
+
+    // CRE Simulation
     function openCREModal() {
       document.getElementById('cre-modal').classList.remove('hidden');
     }
-
     function closeCREModal() {
       document.getElementById('cre-modal').classList.add('hidden');
     }
@@ -821,7 +829,7 @@
       const btn = document.getElementById('btn-run-cre');
       btn.disabled = true;
       btn.innerHTML = `<span class="animate-spin inline-block mr-1">⌛</span> Menjalankan...`;
-      logEl.textContent = "Menginisialisasi simulasi Chainlink CRE WASM...\nKompilasi wasip1 & simulasi limit aktif...\n";
+      logEl.textContent = "Menginisialisasi simulasi Chainlink CRE WASM...\nKompilasi wasip1 & simulasi limits aktif...\n";
 
       try {
         const res = await fetch('/api/simulate-cre', { method: 'POST' });
@@ -836,15 +844,14 @@
       }
     }
 
-    // Init App
+    // Initialization
     window.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
       initChart();
-      fetchLivePrice().then(() => {
-        setThresholdCurrent();
-      });
-      loadHistoryAndStats();
-      setInterval(fetchLivePrice, 1500); // Poll price every 1.5s
+      syncActiveRoundAndPrice();
+      loadRoundsAndStats();
+      setInterval(syncActiveRoundAndPrice, 1000); // 1-second real-time tick
+      setInterval(loadRoundsAndStats, 4000);        // 4-second database sync
     });
   </script>
 </body>
