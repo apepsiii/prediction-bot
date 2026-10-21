@@ -208,6 +208,39 @@
 
       </div>
 
+      <!-- Real-Time Microstructure Order Flow Bar -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-3 border-t border-dark-700/60 text-xs">
+        <div class="bg-dark-900/80 border border-dark-700 rounded-2xl px-4 py-3 flex items-center justify-between">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+              <i data-lucide="layers" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <span class="text-slate-400 text-[11px] font-semibold uppercase tracking-wider block">Order Book Imbalance (Top 20)</span>
+              <span id="live-ob-status" class="text-[10px] text-slate-500 font-sans">Seimbang (Rasio Netral)</span>
+            </div>
+          </div>
+          <div class="font-mono text-base font-bold text-white flex items-center gap-1.5">
+            <span id="live-ob-ratio" class="text-amber-400 font-black">1.00x</span>
+          </div>
+        </div>
+
+        <div class="bg-dark-900/80 border border-dark-700 rounded-2xl px-4 py-3 flex items-center justify-between">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
+              <i data-lucide="flame" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <span class="text-slate-400 text-[11px] font-semibold uppercase tracking-wider block">Taker Buy Aggression (1m Flow)</span>
+              <span id="live-taker-status" class="text-[10px] text-slate-500 font-sans">Seimbang</span>
+            </div>
+          </div>
+          <div class="font-mono text-base font-bold text-white flex items-center gap-1.5">
+            <span id="live-taker-pct" class="text-blue-400 font-black">50.0%</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Action Arena: Tebakan Anda vs Analisis Mendalam AI -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6 pt-6 border-t border-dark-700/80">
         
@@ -224,7 +257,7 @@
           </div>
 
           <p class="text-xs text-slate-400">
-            Tebak apakah harga saat cutoff 5 menit (<span id="user-sub-cutoff-wib" class="text-slate-200 font-mono">--:-- WIB</span>) akan ditutup $\ge$ atau &lt; batas acuan <strong id="user-sub-benchmark" class="text-yellow-400 font-mono">$85,738.00</strong>. Anda dapat mengganti pilihan kapan saja sebelum cutoff!
+            Tebak apakah harga saat cutoff 5 menit (<span id="user-sub-cutoff-wib" class="text-slate-200 font-mono">--:-- WIB</span>) akan ditutup di atas (&gt;) atau di bawah (&lt;) batas acuan <strong id="user-sub-benchmark" class="text-yellow-400 font-mono">$85,738.00</strong>. Anda dapat mengganti pilihan kapan saja sebelum cutoff!
           </p>
 
           <div class="grid grid-cols-2 gap-4 pt-1">
@@ -234,7 +267,7 @@
                 <i data-lucide="arrow-up-circle" class="w-6 h-6 text-white group-hover:scale-110 transition"></i>
                 <span class="text-lg tracking-wide">TEBAK UP (▲)</span>
               </div>
-              <span class="text-[11px] text-emerald-100 font-normal">Harga $\ge$ Batas saat Cutoff 5m</span>
+              <span class="text-[11px] text-emerald-100 font-normal">Harga &gt; Batas saat Cutoff 5m</span>
             </button>
 
             <!-- Tombol TEBAK DOWN -->
@@ -248,12 +281,12 @@
           </div>
         </div>
 
-        <!-- KANAN: AI Quant Multi-Timeframe Box (6 Cols) -->
+        <!-- KANAN: AI Quant 3-Stage Multi-Observation Box (6 Cols) -->
         <div class="lg:col-span-6 bg-dark-900 border border-dark-700 rounded-2xl p-4.5 space-y-3">
           <div class="flex items-center justify-between border-b border-dark-800 pb-2.5">
             <div class="flex items-center space-x-2">
               <i data-lucide="brain-circuit" class="w-4 h-4 text-blue-400"></i>
-              <span class="text-xs font-extrabold text-white uppercase tracking-wider">ANALISIS AI (JANGKA PANJANG & PENDEK)</span>
+              <span class="text-xs font-extrabold text-white uppercase tracking-wider">ANALISIS AI (3 TAHAP OBSERVASI 5-MENIT)</span>
             </div>
             <div class="flex items-center space-x-2 font-mono text-xs">
               <span id="ai-model-badge" class="text-[10px] px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">cbai/glm-5.2</span>
@@ -261,28 +294,125 @@
             </div>
           </div>
 
-          <!-- AI Prediction Badge & Reasoning -->
-          <div class="space-y-2.5">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="text-xs text-slate-400">Pilihan AI Ronde Ini:</span>
-                <span id="ai-choice-badge" class="font-mono text-base font-black px-3 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                  ▲ UP
-                </span>
+          <!-- Whale Shift Alert Banner (Dinamis jika Paus Masuk) -->
+          <div id="whale-alert-banner" class="hidden bg-amber-500/15 border border-amber-500/40 text-amber-300 rounded-xl p-2.5 flex items-center gap-2.5 animate-pulse">
+            <i data-lucide="zap" class="w-5 h-5 text-amber-400 flex-shrink-0"></i>
+            <div class="text-[11px] leading-tight">
+              <span class="font-bold uppercase tracking-wider text-amber-300 block" id="whale-alert-title">⚡ PERUBAHAN ARUS / WHALE SHIFT!</span>
+              <span class="text-amber-200" id="whale-alert-desc">Paus terdeteksi membalikkan aliran order book!</span>
+            </div>
+          </div>
+
+          <!-- 3-Stage Checkpoint Timeline Grid -->
+          <div class="grid grid-cols-3 gap-2 pt-0.5 text-center">
+            <!-- Tahap 1: T=0s -->
+            <div class="bg-dark-800/80 border border-dark-700/80 rounded-xl p-2 flex flex-col justify-between">
+              <div class="text-[9px] font-bold uppercase tracking-wider text-slate-400">Tahap 1 (00:00)</div>
+              <div class="text-[10px] text-slate-500 font-medium">Snapshot Awal</div>
+              <div id="ai-stage1-badge" class="mt-1 font-mono text-xs font-bold px-1 py-0.5 rounded bg-dark-700 text-slate-400">
+                Mengamati...
               </div>
-              <span class="text-[10px] text-slate-400 font-mono">Target Presisi: 99.5%</span>
             </div>
 
-            <!-- Deep Multi-Timeframe Reasoning Body -->
-            <div class="bg-dark-800/90 rounded-xl p-3 border border-dark-700 text-xs text-slate-300 space-y-2">
-              <div class="text-[10px] uppercase font-bold text-slate-400 flex items-center justify-between">
-                <span>Penalaran Kuantitatif Multi-Timeframe:</span>
-                <span class="text-blue-400 font-mono text-[9px]">1m / 5m / 1h / 24h</span>
+            <!-- Tahap 2: T=30s -->
+            <div class="bg-dark-800/80 border border-dark-700/80 rounded-xl p-2 flex flex-col justify-between">
+              <div class="text-[9px] font-bold uppercase tracking-wider text-slate-400">Tahap 2 (00:30)</div>
+              <div class="text-[10px] text-slate-500 font-medium">Konfirmasi Flow</div>
+              <div id="ai-stage2-badge" class="mt-1 font-mono text-xs font-bold px-1 py-0.5 rounded bg-dark-700 text-slate-400">
+                Menunggu...
               </div>
-              <p id="ai-reason-text" class="italic text-slate-200 leading-relaxed font-sans">
-                "AI sedang melakukan evaluasi struktur mikro-momentum 1m-5m dan trend hourly..."
-              </p>
             </div>
+
+            <!-- Tahap 3: T=60s -->
+            <div class="bg-dark-800/80 border border-dark-700/80 rounded-xl p-2 flex flex-col justify-between">
+              <div class="text-[9px] font-bold uppercase tracking-wider text-slate-400">Tahap 3 (01:00)</div>
+              <div class="text-[10px] text-slate-500 font-medium">Validasi 1m</div>
+              <div id="ai-stage3-badge" class="mt-1 font-mono text-xs font-bold px-1 py-0.5 rounded bg-dark-700 text-slate-400">
+                Menunggu...
+              </div>
+            </div>
+          </div>
+
+          <!-- Final Verdict Bar (Kesimpulan Akhir AI) -->
+          <div class="bg-dark-800 border border-dark-700 rounded-xl p-3 flex items-center justify-between">
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">KESIMPULAN FINAL AI (HASIL SINTESIS):</span>
+              <span id="ai-verdict-status" class="text-[11px] text-slate-300">Menunggu observasi 3 tahap selesai...</span>
+            </div>
+            <div id="ai-choice-badge" class="font-mono text-base font-black px-3.5 py-1 rounded-xl bg-blue-500/20 text-blue-400 border border-blue-500/30">
+              Sedang Menganalisis...
+            </div>
+          </div>
+
+          <!-- Reversal / Sinyal Alert Banner -->
+          <div id="reversal-alert-banner" class="hidden bg-rose-500/20 border border-rose-500/50 text-rose-300 p-2.5 rounded-xl text-xs flex items-center justify-between gap-2 shadow-lg shadow-rose-950/40">
+            <div class="flex items-center gap-2">
+              <span class="text-base animate-bounce">🚨</span>
+              <div>
+                <span id="reversal-alert-title" class="font-black text-rose-200">SINYAL BALIK ARAH (REVERSAL)!</span>
+                <p id="reversal-alert-desc" class="text-[10px] text-rose-300/90 leading-tight">Pasar berbalik arah. Sinyal baru terdeteksi.</p>
+              </div>
+            </div>
+            <button id="btn-quick-switch" class="px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-[11px] whitespace-nowrap shadow transition flex items-center gap-1">
+              <span>⚡ Ikuti Sinyal</span>
+            </button>
+          </div>
+
+          <!-- Radar Telemetri & Sinyal Aktif Menit ke-2, 3 & 4 -->
+          <div class="bg-dark-800/80 border border-dark-700/80 rounded-xl p-3 space-y-2">
+            <div class="flex items-center justify-between text-[10px] uppercase font-bold text-slate-400">
+              <span class="flex items-center gap-1.5 text-blue-300">
+                <i data-lucide="radio" class="w-3.5 h-3.5 text-blue-400 animate-pulse"></i>
+                Radar & Sinyal Aktif AI (Menit 2, 3, 4):
+              </span>
+              <span class="text-slate-500 font-mono text-[9px]">Real-Time Signal Engine</span>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 text-center font-mono">
+              <!-- Radar Menit 2 -->
+              <div class="bg-dark-900/90 border border-dark-700 rounded-lg p-2 flex flex-col justify-between">
+                <span class="text-[9px] text-slate-400 block font-sans font-semibold">Menit 2 (Sisa 3m)</span>
+                <div id="radar-m2-badge" class="my-1 text-[10px] font-bold px-1 py-0.5 rounded bg-dark-700 text-slate-500">
+                  Menunggu...
+                </div>
+                <span id="radar-m2-text" class="text-[8.5px] text-slate-400 font-sans leading-tight line-clamp-2">Evaluasi T=120s</span>
+              </div>
+
+              <!-- Sinyal Menit 3 -->
+              <div class="bg-dark-900/90 border border-dark-700 rounded-lg p-2 flex flex-col justify-between relative overflow-hidden">
+                <span class="text-[9px] text-amber-300 block font-sans font-bold flex items-center justify-center gap-1">
+                  <span>⚡ Sinyal M3</span>
+                  <span class="text-[8px] text-slate-400 font-normal">(Sisa 2m)</span>
+                </span>
+                <div id="radar-m3-badge" class="my-1 text-[10px] font-bold px-1 py-0.5 rounded bg-dark-700 text-slate-500">
+                  Menunggu...
+                </div>
+                <span id="radar-m3-text" class="text-[8.5px] text-slate-400 font-sans leading-tight line-clamp-2">Sinyal Kritis T=180s</span>
+              </div>
+
+              <!-- Sinyal Menit 4 -->
+              <div class="bg-dark-900/90 border border-dark-700 rounded-lg p-2 flex flex-col justify-between relative overflow-hidden">
+                <span class="text-[9px] text-emerald-300 block font-sans font-bold flex items-center justify-center gap-1">
+                  <span>🏁 Sinyal M4</span>
+                  <span class="text-[8px] text-slate-400 font-normal">(Final Lap)</span>
+                </span>
+                <div id="radar-m4-badge" class="my-1 text-[10px] font-bold px-1 py-0.5 rounded bg-dark-700 text-slate-500">
+                  Menunggu...
+                </div>
+                <span id="radar-m4-text" class="text-[8.5px] text-slate-400 font-sans leading-tight line-clamp-2">Sprint 60s T=240s</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Deep Multi-Stage Reasoning Body -->
+          <div class="bg-dark-800/90 rounded-xl p-3 border border-dark-700 text-xs text-slate-300 space-y-1.5">
+            <div class="text-[10px] uppercase font-bold text-slate-400 flex items-center justify-between">
+              <span>Penalaran Kuantitatif Multi-Stage:</span>
+              <span class="text-blue-400 font-mono text-[9px]">3 Checkpoints + Konsensus</span>
+            </div>
+            <p id="ai-reason-text" class="italic text-slate-200 leading-relaxed font-sans text-[11px]">
+              "AI sedang melakukan observasi tahap 1 di detik awal..."
+            </p>
           </div>
         </div>
 
@@ -422,11 +552,11 @@
       <div class="space-y-3 text-xs">
         <div class="grid grid-cols-2 gap-2 bg-dark-900 p-3 rounded-xl border border-dark-700">
           <div>
-            <span class="text-slate-400">Pilihan AI:</span>
+            <span class="text-slate-400">Kesimpulan Final:</span>
             <span id="modal-ai-choice" class="font-mono font-bold text-emerald-400 ml-1">▲ UP</span>
           </div>
           <div>
-            <span class="text-slate-400">Confidence:</span>
+            <span class="text-slate-400">Confidence Final:</span>
             <span id="modal-ai-confidence" class="font-mono font-bold text-white ml-1">95%</span>
           </div>
           <div class="col-span-2 text-[11px] text-slate-400">
@@ -434,8 +564,47 @@
           </div>
         </div>
 
+        <!-- 3-Stage Checkpoint Breakdown in Modal -->
+        <div class="grid grid-cols-3 gap-2 bg-dark-900 p-2.5 rounded-xl border border-dark-700 text-center font-mono">
+          <div>
+            <div class="text-[9px] uppercase tracking-wider text-slate-400">Tahap 1 (00:00)</div>
+            <div id="modal-stage1" class="text-xs font-bold text-slate-300 mt-0.5">--</div>
+          </div>
+          <div>
+            <div class="text-[9px] uppercase tracking-wider text-slate-400">Tahap 2 (00:30)</div>
+            <div id="modal-stage2" class="text-xs font-bold text-slate-300 mt-0.5">--</div>
+          </div>
+          <div>
+            <div class="text-[9px] uppercase tracking-wider text-slate-400">Tahap 3 (01:00)</div>
+            <div id="modal-stage3" class="text-xs font-bold text-slate-300 mt-0.5">--</div>
+          </div>
+        </div>
+
+        <div id="modal-whale-wrap" class="hidden bg-amber-500/20 border border-amber-500/40 text-amber-300 p-2 rounded-xl text-[11px]">
+          <span class="font-bold">⚡ Whale Alert: </span><span id="modal-whale-text">--</span>
+        </div>
+
+        <!-- Radar Monitoring (Menit 2, 3, 4) in Modal -->
+        <div class="bg-dark-900 p-2.5 rounded-xl border border-dark-700 space-y-1.5 font-mono">
+          <span class="text-[9px] uppercase tracking-wider text-slate-400 block font-sans font-bold">Radar Monitoring AI (Menit 2, 3, 4):</span>
+          <div class="grid grid-cols-3 gap-2 text-center text-xs">
+            <div class="bg-dark-800 p-1.5 rounded-lg border border-dark-700/60">
+              <div class="text-[8.5px] text-slate-400 uppercase font-sans font-semibold">Menit 2</div>
+              <div id="modal-radar-m2" class="text-[10px] font-bold text-slate-300 mt-0.5">--</div>
+            </div>
+            <div class="bg-dark-800 p-1.5 rounded-lg border border-dark-700/60">
+              <div class="text-[8.5px] text-slate-400 uppercase font-sans font-semibold">Menit 3</div>
+              <div id="modal-radar-m3" class="text-[10px] font-bold text-slate-300 mt-0.5">--</div>
+            </div>
+            <div class="bg-dark-800 p-1.5 rounded-lg border border-dark-700/60">
+              <div class="text-[8.5px] text-slate-400 uppercase font-sans font-semibold">Menit 4</div>
+              <div id="modal-radar-m4" class="text-[10px] font-bold text-slate-300 mt-0.5">--</div>
+            </div>
+          </div>
+        </div>
+
         <div class="space-y-1">
-          <span class="text-slate-400 font-semibold uppercase text-[10px] tracking-wider">Penalaran Kuantitatif Lengkap:</span>
+          <span class="text-slate-400 font-semibold uppercase text-[10px] tracking-wider">Penalaran Kuantitatif Konsensus:</span>
           <p id="modal-ai-reasoning" class="text-slate-200 bg-dark-900 p-3.5 rounded-xl border border-dark-700 leading-relaxed font-sans italic whitespace-pre-wrap">
             --
           </p>
@@ -624,6 +793,41 @@
       const textHeadline = document.getElementById('status-text-headline');
       const textSub = document.getElementById('status-text-sub');
 
+      // Order Book & Taker Flow Metrics
+      if (data.order_book_ratio !== undefined) {
+        const obRatioEl = document.getElementById('live-ob-ratio');
+        const obStatusEl = document.getElementById('live-ob-status');
+        if (obRatioEl && obStatusEl) {
+          obRatioEl.textContent = `${Number(data.order_book_ratio).toFixed(2)}x`;
+          obStatusEl.textContent = data.order_book_status || 'Seimbang';
+          if (data.order_book_ratio >= 1.25) {
+            obRatioEl.className = 'text-emerald-400 font-black';
+          } else if (data.order_book_ratio <= 0.80) {
+            obRatioEl.className = 'text-rose-400 font-black';
+          } else {
+            obRatioEl.className = 'text-amber-400 font-black';
+          }
+        }
+      }
+
+      if (data.taker_buy_pct_1m !== undefined) {
+        const takerEl = document.getElementById('live-taker-pct');
+        const takerStatusEl = document.getElementById('live-taker-status');
+        if (takerEl && takerStatusEl) {
+          takerEl.textContent = `${Number(data.taker_buy_pct_1m).toFixed(1)}%`;
+          if (data.taker_buy_pct_1m >= 54) {
+            takerEl.className = 'text-emerald-400 font-black';
+            takerStatusEl.textContent = 'Buyer Agresif Melahap Ask';
+          } else if (data.taker_buy_pct_1m <= 46) {
+            takerEl.className = 'text-rose-400 font-black';
+            takerStatusEl.textContent = 'Seller Agresif Menghantam Bid';
+          } else {
+            takerEl.className = 'text-blue-400 font-black';
+            takerStatusEl.textContent = 'Order Flow Seimbang';
+          }
+        }
+      }
+
       if (isAbove) {
         cardBox.className = 'bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4.5 flex flex-col justify-between';
         iconWrap.className = 'w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400';
@@ -671,17 +875,81 @@
         btnDown.className = 'py-4 px-4 rounded-2xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-bold text-base shadow-lg shadow-rose-500/20 flex flex-col items-center justify-center space-y-1 transition transform active:scale-95 group border border-rose-400/30';
       }
 
-      // AI Analysis
+      // Update 3-Stage Checkpoint Badges
+      updateStageBadge('ai-stage1-badge', r.ai_stage1_choice, r.ai_stage1_conf);
+      updateStageBadge('ai-stage2-badge', r.ai_stage2_choice, r.ai_stage2_conf);
+      updateStageBadge('ai-stage3-badge', r.ai_stage3_choice, r.ai_stage3_conf);
+
+      // AI Final Verdict Badge & Status Text
       const aiBadge = document.getElementById('ai-choice-badge');
-      if (r.ai_choice === 'UP') {
-        aiBadge.textContent = '▲ UP';
-        aiBadge.className = 'font-mono text-base font-black px-3 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
-      } else if (r.ai_choice === 'DOWN') {
-        aiBadge.textContent = '▼ DOWN';
-        aiBadge.className = 'font-mono text-base font-black px-3 py-0.5 rounded-lg bg-rose-500/20 text-rose-400 border border-rose-500/30';
+      const verdictStatusEl = document.getElementById('ai-verdict-status');
+
+      if (r.ai_stage3_choice) {
+        if (r.ai_choice === 'UP') {
+          aiBadge.textContent = '▲ UP';
+          aiBadge.className = 'font-mono text-base font-black px-3.5 py-1 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-lg shadow-emerald-500/20';
+        } else if (r.ai_choice === 'DOWN') {
+          aiBadge.textContent = '▼ DOWN';
+          aiBadge.className = 'font-mono text-base font-black px-3.5 py-1 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/40 shadow-lg shadow-rose-500/20';
+        } else {
+          aiBadge.textContent = 'Menganalisis...';
+          aiBadge.className = 'font-mono text-xs font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400';
+        }
+        if (verdictStatusEl) verdictStatusEl.textContent = `Pilihan final terkunci (${r.ai_confidence || 95}% akurasi)`;
+      } else if (r.ai_stage2_choice) {
+        aiBadge.textContent = r.ai_choice === 'UP' ? '▲ UP (30s)' : (r.ai_choice === 'DOWN' ? '▼ DOWN (30s)' : 'Memproses 30s...');
+        aiBadge.className = 'font-mono text-xs font-bold px-2.5 py-1 rounded-xl bg-blue-500/20 text-blue-300 border border-blue-500/30';
+        if (verdictStatusEl) verdictStatusEl.textContent = 'Tahap 2 selesai • Memvalidasi candle 1m (01:00)...';
+      } else if (r.ai_stage1_choice) {
+        aiBadge.textContent = r.ai_choice === 'UP' ? '▲ UP (0s)' : (r.ai_choice === 'DOWN' ? '▼ DOWN (0s)' : 'Memproses 0s...');
+        aiBadge.className = 'font-mono text-xs font-bold px-2.5 py-1 rounded-xl bg-blue-500/20 text-blue-300 border border-blue-500/30';
+        if (verdictStatusEl) verdictStatusEl.textContent = 'Tahap 1 selesai • Mengamati aliran order 30s...';
       } else {
         aiBadge.textContent = 'Sedang Menganalisis...';
         aiBadge.className = 'font-mono text-xs font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400';
+        if (verdictStatusEl) verdictStatusEl.textContent = 'Menunggu observasi 3 tahap selesai...';
+      }
+
+      // Whale Shift Alert Banner
+      const whaleBanner = document.getElementById('whale-alert-banner');
+      const whaleDesc = document.getElementById('whale-alert-desc');
+      if (r.whale_alert && r.whale_alert.trim() !== '') {
+        whaleBanner.classList.remove('hidden');
+        if (whaleDesc) whaleDesc.textContent = r.whale_alert;
+      } else {
+        whaleBanner.classList.add('hidden');
+      }
+
+      // Radar Telemetry & Sinyal Menit 2, 3, dan 4
+      renderRadarBadge('radar-m2-badge', 'radar-m2-text', r.ai_m2_info, 2);
+      renderRadarBadge('radar-m3-badge', 'radar-m3-text', r.ai_m3_info, 3);
+      renderRadarBadge('radar-m4-badge', 'radar-m4-text', r.ai_m4_info, 4);
+
+      // Check Reversal Banner from M3 or M4
+      let activeReversal = null;
+      [r.ai_m4_info, r.ai_m3_info].forEach(info => {
+        if (!activeReversal && info) {
+          try {
+            const parsed = JSON.parse(info);
+            if (parsed.signal_type === 'REVERSAL_ALERT') {
+              activeReversal = parsed;
+            }
+          } catch(e){}
+        }
+      });
+
+      const revBanner = document.getElementById('reversal-alert-banner');
+      const revDesc = document.getElementById('reversal-alert-desc');
+      const revBtn = document.getElementById('btn-quick-switch');
+      if (activeReversal && r.user_choice !== activeReversal.signal) {
+        if (revBanner) revBanner.classList.remove('hidden');
+        if (revDesc) revDesc.innerHTML = `<strong class="text-white">Pilihan resmi AI tetap terkunci di ${r.ai_choice}</strong>, namun radar live mendeteksi pasar beralih ke <strong class="text-amber-300 font-mono">${activeReversal.signal}</strong> (${activeReversal.confidence}%). Anda dapat mengamankan tebakan Anda!`;
+        if (revBtn) {
+          revBtn.innerHTML = `<span>⚡ Switch Tebakan Saya ke ${activeReversal.signal === 'UP' ? '▲ UP' : '▼ DOWN'}</span>`;
+          revBtn.onclick = () => submitUserChoice(activeReversal.signal);
+        }
+      } else {
+        if (revBanner) revBanner.classList.add('hidden');
       }
 
       document.getElementById('ai-conf-text').textContent = `${r.ai_confidence > 0 ? r.ai_confidence : 95}%`;
@@ -689,6 +957,72 @@
       document.getElementById('ai-model-badge').textContent = r.ai_model || 'cbai/glm-5.2';
 
       lucide.createIcons();
+    }
+
+    function updateStageBadge(elId, choice, conf) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      if (choice === 'UP') {
+        el.innerHTML = `▲ UP <span class="text-[9px] font-normal opacity-90">${conf ? conf + '%' : ''}</span>`;
+        el.className = 'mt-1 font-mono text-xs font-black px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-sm';
+      } else if (choice === 'DOWN') {
+        el.innerHTML = `▼ DOWN <span class="text-[9px] font-normal opacity-90">${conf ? conf + '%' : ''}</span>`;
+        el.className = 'mt-1 font-mono text-xs font-black px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30 shadow-sm';
+      } else {
+        el.textContent = 'Menunggu...';
+        el.className = 'mt-1 font-mono text-xs font-semibold px-1 py-0.5 rounded bg-dark-700/60 text-slate-500 border border-dark-600/40';
+      }
+    }
+
+    let latestRecommendedSignal = null;
+
+    function renderRadarBadge(badgeId, textId, rawJson, minute) {
+      const badgeEl = document.getElementById(badgeId);
+      const textEl = document.getElementById(textId);
+      if (!badgeEl) return;
+
+      if (!rawJson || rawJson.trim() === '') {
+        badgeEl.textContent = 'Menunggu...';
+        badgeEl.className = 'my-1 text-[10px] font-bold px-1 py-0.5 rounded bg-dark-700 text-slate-500';
+        if (textEl) textEl.textContent = minute === 2 ? 'Evaluasi T=120s' : (minute === 3 ? 'Sinyal Kritis T=180s' : 'Sprint 60s T=240s');
+        return;
+      }
+
+      try {
+        const data = JSON.parse(rawJson);
+        const deltaStr = `${data.delta_usd >= 0 ? '+' : ''}$${data.delta_usd.toFixed(2)}`;
+        const isUp = data.signal === 'UP';
+        const isReversal = data.signal_type === 'REVERSAL_ALERT';
+
+        if (minute >= 3 && data.signal) {
+          latestRecommendedSignal = data.signal;
+          if (isReversal) {
+            badgeEl.innerHTML = `🔄 SINYAL: ${isUp ? '▲ UP' : '▼ DOWN'} <span class="text-[8px] font-mono">(${data.confidence}%)</span>`;
+            badgeEl.className = `my-1 text-[9.5px] font-black px-1.5 py-0.5 rounded ${isUp ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/50' : 'bg-rose-500/25 text-rose-300 border border-rose-500/50'} shadow-md animate-pulse`;
+          } else {
+            badgeEl.innerHTML = `🎯 SINYAL: ${isUp ? '▲ UP' : '▼ DOWN'} <span class="text-[8px] font-mono">(${data.confidence}%)</span>`;
+            badgeEl.className = `my-1 text-[9.5px] font-black px-1.5 py-0.5 rounded ${isUp ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-rose-500/20 text-rose-400 border border-rose-500/40'} shadow-sm`;
+          }
+        } else {
+          if (data.status === 'ON_TRACK') {
+            badgeEl.innerHTML = `🟢 ON-TRACK <span class="text-[8.5px] font-mono">${deltaStr}</span>`;
+            badgeEl.className = 'my-1 text-[9.5px] font-black px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-sm';
+          } else if (data.status === 'UNDER_PRESSURE') {
+            badgeEl.innerHTML = `🔴 TERTEKAN <span class="text-[8.5px] font-mono">${deltaStr}</span>`;
+            badgeEl.className = 'my-1 text-[9.5px] font-black px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-400 border border-rose-500/30 animate-pulse';
+          } else {
+            badgeEl.innerHTML = `🟡 KETAT <span class="text-[8.5px] font-mono">${deltaStr}</span>`;
+            badgeEl.className = 'my-1 text-[9.5px] font-black px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30';
+          }
+        }
+
+        if (textEl) {
+          textEl.textContent = data.message || `Spot: $${data.spot.toFixed(2)}`;
+        }
+      } catch (e) {
+        badgeEl.textContent = 'Info';
+        if (textEl) textEl.textContent = rawJson;
+      }
     }
 
     // Submit User Choice for Active Round
@@ -803,13 +1137,79 @@
       if (!r) return;
 
       document.getElementById('modal-round-id').textContent = `${r.symbol} • ${r.id}`;
-      document.getElementById('modal-ai-choice').textContent = r.ai_choice === 'UP' ? '▲ UP' : '▼ DOWN';
-      document.getElementById('modal-ai-choice').className = `font-mono font-bold ml-1 ${r.ai_choice === 'UP' ? 'text-emerald-400' : 'text-rose-400'}`;
+      document.getElementById('modal-ai-choice').textContent = r.ai_choice === 'UP' ? '▲ UP' : (r.ai_choice === 'DOWN' ? '▼ DOWN' : '--');
+      document.getElementById('modal-ai-choice').className = `font-mono font-bold ml-1 ${r.ai_choice === 'UP' ? 'text-emerald-400' : (r.ai_choice === 'DOWN' ? 'text-rose-400' : 'text-slate-400')}`;
       document.getElementById('modal-ai-confidence').textContent = `${r.ai_confidence || 95}%`;
       document.getElementById('modal-ai-model').textContent = r.ai_model || 'cbai/glm-5.2';
       document.getElementById('modal-ai-reasoning').textContent = r.ai_reasoning || 'Tidak ada catatan analisis tersimpan.';
 
+      // Populate 3 Stages in Modal
+      const st1 = document.getElementById('modal-stage1');
+      if (st1) {
+        st1.textContent = r.ai_stage1_choice ? `${r.ai_stage1_choice} (${r.ai_stage1_conf || 0}%)` : '--';
+        st1.className = `text-xs font-bold mt-0.5 ${r.ai_stage1_choice === 'UP' ? 'text-emerald-400' : (r.ai_stage1_choice === 'DOWN' ? 'text-rose-400' : 'text-slate-400')}`;
+      }
+      const st2 = document.getElementById('modal-stage2');
+      if (st2) {
+        st2.textContent = r.ai_stage2_choice ? `${r.ai_stage2_choice} (${r.ai_stage2_conf || 0}%)` : '--';
+        st2.className = `text-xs font-bold mt-0.5 ${r.ai_stage2_choice === 'UP' ? 'text-emerald-400' : (r.ai_stage2_choice === 'DOWN' ? 'text-rose-400' : 'text-slate-400')}`;
+      }
+      const st3 = document.getElementById('modal-stage3');
+      if (st3) {
+        st3.textContent = r.ai_stage3_choice ? `${r.ai_stage3_choice} (${r.ai_stage3_conf || 0}%)` : '--';
+        st3.className = `text-xs font-bold mt-0.5 ${r.ai_stage3_choice === 'UP' ? 'text-emerald-400' : (r.ai_stage3_choice === 'DOWN' ? 'text-rose-400' : 'text-slate-400')}`;
+      }
+
+      const modalWhaleWrap = document.getElementById('modal-whale-wrap');
+      const modalWhaleText = document.getElementById('modal-whale-text');
+      if (r.whale_alert && r.whale_alert.trim() !== '') {
+        if (modalWhaleWrap) modalWhaleWrap.classList.remove('hidden');
+        if (modalWhaleText) modalWhaleText.textContent = r.whale_alert;
+      } else {
+        if (modalWhaleWrap) modalWhaleWrap.classList.add('hidden');
+      }
+
+      // Populate Radar Telemetry M2, M3, M4 in Modal
+      populateModalRadar('modal-radar-m2', r.ai_m2_info, 2);
+      populateModalRadar('modal-radar-m3', r.ai_m3_info, 3);
+      populateModalRadar('modal-radar-m4', r.ai_m4_info, 4);
+
       document.getElementById('ai-detail-modal').classList.remove('hidden');
+    }
+
+    function populateModalRadar(elId, rawJson, minute) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      if (!rawJson || rawJson.trim() === '') {
+        el.textContent = '--';
+        el.className = 'text-[10px] font-bold text-slate-400 mt-0.5';
+        return;
+      }
+      try {
+        const d = JSON.parse(rawJson);
+        const delta = `${d.delta_usd >= 0 ? '+' : ''}$${d.delta_usd.toFixed(1)}`;
+        const isUp = d.signal === 'UP';
+        if (d.signal && minute >= 3) {
+          const sigIcon = isUp ? '▲ UP' : '▼ DOWN';
+          const sigColor = isUp ? 'text-emerald-400' : 'text-rose-400';
+          const typeBadge = d.signal_type === 'REVERSAL_ALERT' ? '🔄 REVERSAL' : '🎯 SINYAL';
+          el.innerHTML = `<span class="text-[8.5px] uppercase font-bold text-slate-400">${typeBadge}</span><br/><strong class="${sigColor} text-xs">${sigIcon}</strong> <span class="text-[9px] font-mono opacity-90">(${d.confidence}%)</span><br/><span class="text-[8.5px] text-slate-400 font-mono">${delta}</span>`;
+          el.className = 'text-[10px] font-bold mt-0.5 leading-tight';
+        } else {
+          if (d.status === 'ON_TRACK') {
+            el.innerHTML = `🟢 ON-TRACK<br/><span class="text-[9px] text-emerald-400 font-mono">${delta}</span>`;
+            el.className = 'text-[10px] font-bold text-emerald-400 mt-0.5 leading-tight';
+          } else if (d.status === 'UNDER_PRESSURE') {
+            el.innerHTML = `🔴 TERTEKAN<br/><span class="text-[9px] text-rose-400 font-mono">${delta}</span>`;
+            el.className = 'text-[10px] font-bold text-rose-400 mt-0.5 leading-tight';
+          } else {
+            el.innerHTML = `🟡 KETAT<br/><span class="text-[9px] text-amber-400 font-mono">${delta}</span>`;
+            el.className = 'text-[10px] font-bold text-amber-400 mt-0.5 leading-tight';
+          }
+        }
+      } catch (e) {
+        el.textContent = rawJson.substring(0, 15);
+      }
     }
 
     function closeAIDetailModal() {
